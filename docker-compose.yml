@@ -7,6 +7,8 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: AFA
       MONGO_INITDB_ROOT_PASSWORD: AFA
+    ports:
+      - 27017:27017
     volumes:
       - ./data:/data/db
 

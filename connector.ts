@@ -12,6 +12,7 @@ export class MongoInstance {
 	private db: Db;
 
 	async start() {
+		console.log("Starting to connect to mongo");
 		try {
 			this.client = new MongoClient(DB_URL, {
 				auth: {
@@ -21,6 +22,7 @@ export class MongoInstance {
 			});
 			await this.client.connect();
 			this.db = this.client.db(DB_NAME);
+			console.log("DB connected to: " + DB_NAME);
 		} catch (err) {
 			console.log("ERROR", err);
 		}
@@ -28,6 +30,7 @@ export class MongoInstance {
 	}
 
 	static start() {
+		console.log("Mongo fired up");
 		return new MongoInstance().start();
 	}
 }
