@@ -23,6 +23,9 @@ export abstract class SkybitchesRouter {
 		this.registerCreateUser();
 		this.registerLogin();
 
+		//All routes after this point require validation on the token provided
+		this.ensureLoggedInMiddleware();
+
 		this.registerSetVoteByUser();
 		this.registerGetVoteByUser();
 		this.registerGetVotedMenusByUser();
@@ -35,6 +38,33 @@ export abstract class SkybitchesRouter {
 		this.registerGetMenuForId();
 		this.registerGetMenuStateToday();
 		this.registerGetMenusTakenForUser();
+	}
+
+	private ensureLoggedInMiddleware() {
+		this.app.use((req, res, next) => {
+			if (req.cookies.token == undefined) {
+				res.status(401).send("No token provided!");
+				return;
+			}
+
+			this.getSessionTokenFromDb(req.cookies.token, (token) => {
+				if (token == null) {
+					res.status(403).send("Invalid token!");
+					return;
+				} else {
+					if (
+						token.token !==
+						this.createSessionTokenWithDate(token.name, token.passwordHash)
+					) {
+						res.status(400).send("Invalid token!");
+						this.sessionCollection.deleteOne({ token: token.token });
+						return;
+					} else {
+						next();
+					}
+				}
+			});
+		});
 	}
 
 	//User stuff
@@ -74,12 +104,18 @@ export abstract class SkybitchesRouter {
 	}
 
 	protected getSessionTokenFromDb(
-		token: string,
+		token: string | undefined,
 		callback: (token: UserToken | null) => void
 	): void {
+		if (token == null) {
+			callback(null);
+			return;
+		}
+
 		this.sessionCollection
 			.findOne<UserToken>({ token: token })
 			.then((dBtoken) => {
+				console.log(dBtoken);
 				if (dBtoken == null) {
 					callback(null);
 				} else {
@@ -88,19 +124,25 @@ export abstract class SkybitchesRouter {
 			});
 	}
 
-	protected createSessionToken(
-		token: string,
-		passwordHash: string,
-		name: string
-	) {
-		this.getSessionTokenFromDb(token, (token) => {
-			if (token == null) {
-				this.sessionCollection.insertOne({
-					token: token,
-					passwordHash: passwordHash,
-					name: name,
-				});
-			}
+	protected createSessionTokenWithDate(name: string, password: string): string {
+		return this.calculateHashWithTodaySalt(name + password);
+	}
+
+	protected async persistSessionToken(
+		name: string,
+		passwordHash: string
+	): Promise<string> {
+		const token = this.createSessionTokenWithDate(name, passwordHash);
+		const dbToken = await this.sessionCollection.findOne<UserToken>({
+			token: token,
 		});
+		if (dbToken == null) {
+			this.sessionCollection.insertOne({
+				token: token,
+				passwordHash: passwordHash,
+				name: name,
+			} as UserToken);
+		}
+		return token;
 	}
 }

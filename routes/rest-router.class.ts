@@ -1,7 +1,7 @@
 import express from "express";
 import { Db } from "mongodb";
 import { SkybitchesRouter } from "../model/abstract-skybitches-router.interface";
-import { User, UserToken } from "../model/user";
+import { User } from "../model/user";
 export class RestRouter extends SkybitchesRouter {
 	/**
 	 *
@@ -52,15 +52,15 @@ export class RestRouter extends SkybitchesRouter {
 
 			this.userCollection
 				.findOne({ name: user.name, password: user.password })
-				.then((dbCollecterUser) => {
+				.then(async (dbCollecterUser) => {
 					if (dbCollecterUser == null) {
 						res.status(400).send("Login failed!");
 						return;
 					} else {
-						const token = this.calculateHashWithTodaySalt(
-							user.name + user.password
+						var token: string = await this.persistSessionToken(
+							user.name,
+							user.password
 						);
-						this.createSessionToken(token, user.password, user.name);
 						res.cookie("token", token);
 						res.status(200).send("Login successful!");
 						return;
@@ -69,7 +69,11 @@ export class RestRouter extends SkybitchesRouter {
 		});
 	}
 
-	public registerSetVoteByUser(): void {}
+	public registerSetVoteByUser(): void {
+		this.app.get("/voted", (req: any, res: any) => {
+			res.status(200).send("Voted!");
+		});
+	}
 
 	public registerGetVoteByUser(): void {}
 	public registerGetVotedMenusByUser(): void {}

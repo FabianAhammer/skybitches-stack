@@ -5,6 +5,6 @@ export interface User {
 
 export interface UserToken {
 	token: string;
-	user: string;
-	password: string;
+	name: string;
+	passwordHash: string;
 }
