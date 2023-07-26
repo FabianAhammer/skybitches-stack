@@ -1,7 +1,8 @@
 import express from "express";
-import { Db } from "mongodb";
+import { Db, WithId } from "mongodb";
 import { SkybitchesRouter } from "../model/abstract-skybitches-router.interface";
 import { User } from "../model/user";
+import { RestaurantLocation } from "../model/location";
 export class RestRouter extends SkybitchesRouter {
 	/**
 	 *
@@ -70,9 +71,7 @@ export class RestRouter extends SkybitchesRouter {
 	}
 
 	public registerSetVoteByUser(): void {
-		this.app.get("/voted", (req, res) => {
-			res.status(200).send(req.body);
-		});
+		this.app.get("/voted", (req, res) => {});
 	}
 
 	public registerGetVoteByUser(): void {}
@@ -80,10 +79,33 @@ export class RestRouter extends SkybitchesRouter {
 	public registerGetVotesForLocation(): void {}
 	public registerGetTodayWinningVoteStatus(): void {}
 
-	public registerGetLocations(): void {}
+	public registerGetLocations(): void {
+		this.app.get("/locations", async (req, res) => {
+			const locations: RestaurantLocation[] = (
+				await this.locationCollection.find().toArray()
+			).map((location: WithId<RestaurantLocation>) => {
+				return { name: location.name, id: location.id };
+			});
+
+			res.status(200).send(locations);
+		});
+	}
 
 	public registerSetMenuEntryForUser(): void {}
 	public registerGetMenuForId(): void {}
 	public registerGetMenuStateToday(): void {}
 	public registerGetMenusTakenForUser(): void {}
+
+	public registerAddLocation(): void {
+		this.app.post("/addlocation", (req, res) => {
+			if (!req?.body?.location_name) {
+				res.status(400).send("No location name provided!");
+				return;
+			}
+			const name = req.body.location_name;
+			const location = new RestaurantLocation(name);
+			this.locationCollection.insertOne(location);
+			res.status(200).send(req.body);
+		});
+	}
 }

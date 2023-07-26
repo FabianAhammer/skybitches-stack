@@ -2,13 +2,17 @@ import express from "express";
 import { Collection, Db } from "mongodb";
 import { createHash } from "node:crypto";
 import { HASH_SALT } from "../env";
-import { UserToken } from "./user";
+import { SessionData, User } from "./user";
+import { RestaurantLocation } from "./location";
+import { DailyVoting } from "./voting";
 /**
  * Router implementing the routes for the Skybitches API.
  */
 export abstract class SkybitchesRouter {
-	protected userCollection: Collection;
-	protected sessionCollection: Collection;
+	protected userCollection: Collection<User>;
+	protected sessionCollection: Collection<SessionData>;
+	protected locationCollection: Collection<RestaurantLocation>;
+	protected votingCollection: Collection<DailyVoting>;
 
 	constructor(protected app: express.Express, protected db: Db) {
 		console.log(
@@ -17,6 +21,7 @@ export abstract class SkybitchesRouter {
 		);
 		this.userCollection = db.collection("users");
 		this.sessionCollection = db.collection("session");
+		this.locationCollection = db.collection("location");
 	}
 
 	public registerRoutes(): void {
@@ -38,6 +43,8 @@ export abstract class SkybitchesRouter {
 		this.registerGetMenuForId();
 		this.registerGetMenuStateToday();
 		this.registerGetMenusTakenForUser();
+
+		this.registerAddLocation();
 	}
 
 	private ensureLoggedInMiddleware() {
@@ -82,6 +89,7 @@ export abstract class SkybitchesRouter {
 
 	//Location
 	public abstract registerGetLocations(): void;
+	public abstract registerAddLocation(): void;
 
 	//Menu
 	public abstract registerSetMenuEntryForUser(): void;
@@ -107,7 +115,7 @@ export abstract class SkybitchesRouter {
 
 	protected getSessionTokenFromDb(
 		token: string | undefined,
-		callback: (token: UserToken | null) => void
+		callback: (token: SessionData | null) => void
 	): void {
 		if (token == null) {
 			callback(null);
@@ -115,9 +123,8 @@ export abstract class SkybitchesRouter {
 		}
 
 		this.sessionCollection
-			.findOne<UserToken>({ token: token })
+			.findOne<SessionData>({ token: token })
 			.then((dBtoken) => {
-				console.log(dBtoken);
 				if (dBtoken == null) {
 					callback(null);
 				} else {
@@ -135,7 +142,7 @@ export abstract class SkybitchesRouter {
 		passwordHash: string
 	): Promise<string> {
 		const token = this.createSessionTokenWithDate(name, passwordHash);
-		const dbToken = await this.sessionCollection.findOne<UserToken>({
+		const dbToken = await this.sessionCollection.findOne<SessionData>({
 			token: token,
 		});
 		if (dbToken == null) {
@@ -143,7 +150,7 @@ export abstract class SkybitchesRouter {
 				token: token,
 				passwordHash: passwordHash,
 				name: name,
-			} as UserToken);
+			} as SessionData);
 		}
 		return token;
 	}

@@ -3,7 +3,7 @@ export interface User {
 	password: string;
 }
 
-export interface UserToken {
+export interface SessionData {
 	token: string;
 	name: string;
 	passwordHash: string;
