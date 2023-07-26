@@ -1,7 +1,7 @@
 import express from "express";
 import { Db } from "mongodb";
 import { SkybitchesRouter } from "../model/abstract-skybitches-router.interface";
-import { User } from "../model/user";
+import { User, UserToken } from "../model/user";
 export class RestRouter extends SkybitchesRouter {
 	/**
 	 *
@@ -57,8 +57,11 @@ export class RestRouter extends SkybitchesRouter {
 						res.status(400).send("Login failed!");
 						return;
 					} else {
-						res.cookie("user", user.name);
-						res.cookie("token", this.calculateHashWithTodaySalt(user.password));
+						const token = this.calculateHashWithTodaySalt(
+							user.name + user.password
+						);
+						this.createSessionToken(token, user.password, user.name);
+						res.cookie("token", token);
 						res.status(200).send("Login successful!");
 						return;
 					}
@@ -79,6 +82,4 @@ export class RestRouter extends SkybitchesRouter {
 	public registerGetMenuForId(): void {}
 	public registerGetMenuStateToday(): void {}
 	public registerGetMenusTakenForUser(): void {}
-
-	private getUserIdForHash(hash: string): string {}
 }

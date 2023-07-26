@@ -5,8 +5,8 @@ services:
     image: mongo:6.0.8
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: AFA
-      MONGO_INITDB_ROOT_PASSWORD: AFA
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     ports:
       - 27017:27017
     volumes:

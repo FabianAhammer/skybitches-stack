@@ -2,11 +2,13 @@ import express from "express";
 import { Collection, Db } from "mongodb";
 import { createHash } from "node:crypto";
 import { HASH_SALT } from "../env";
+import { UserToken } from "./user";
 /**
  * Router implementing the routes for the Skybitches API.
  */
 export abstract class SkybitchesRouter {
 	protected userCollection: Collection;
+	protected sessionCollection: Collection;
 
 	constructor(protected app: express.Express, protected db: Db) {
 		console.log(
@@ -14,6 +16,7 @@ export abstract class SkybitchesRouter {
 			db ? "'running'." : "'NOT CONNECTED'!"
 		);
 		this.userCollection = db.collection("users");
+		this.sessionCollection = db.collection("session");
 	}
 
 	public registerRoutes(): void {
@@ -68,5 +71,36 @@ export abstract class SkybitchesRouter {
 	 */
 	protected calculateHashWithTodaySalt(req: string): string {
 		return this.calculateHash(req + new Date().toISOString().split("T")[0]);
+	}
+
+	protected getSessionTokenFromDb(
+		token: string,
+		callback: (token: UserToken | null) => void
+	): void {
+		this.sessionCollection
+			.findOne<UserToken>({ token: token })
+			.then((dBtoken) => {
+				if (dBtoken == null) {
+					callback(null);
+				} else {
+					callback(dBtoken);
+				}
+			});
+	}
+
+	protected createSessionToken(
+		token: string,
+		passwordHash: string,
+		name: string
+	) {
+		this.getSessionTokenFromDb(token, (token) => {
+			if (token == null) {
+				this.sessionCollection.insertOne({
+					token: token,
+					passwordHash: passwordHash,
+					name: name,
+				});
+			}
+		});
 	}
 }
