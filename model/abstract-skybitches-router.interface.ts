@@ -60,6 +60,8 @@ export abstract class SkybitchesRouter {
 						this.sessionCollection.deleteOne({ token: token.token });
 						return;
 					} else {
+						//Appends login information to the request
+						req.body["_skybitches_data"] = token;
 						next();
 					}
 				}

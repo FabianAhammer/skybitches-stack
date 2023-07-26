@@ -70,8 +70,8 @@ export class RestRouter extends SkybitchesRouter {
 	}
 
 	public registerSetVoteByUser(): void {
-		this.app.get("/voted", (req: any, res: any) => {
-			res.status(200).send("Voted!");
+		this.app.get("/voted", (req, res) => {
+			res.status(200).send(req.body);
 		});
 	}
 
