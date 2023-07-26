@@ -1,6 +1,7 @@
 import express from "express";
 import { Collection, Db } from "mongodb";
 import { createHash } from "node:crypto";
+import { HASH_SALT } from "../env";
 /**
  * Router implementing the routes for the Skybitches API.
  */
@@ -53,7 +54,19 @@ export abstract class SkybitchesRouter {
 	public abstract registerGetMenuStateToday(): void;
 	public abstract registerGetMenusTakenForUser(): void;
 
+	/**
+	 * Create hash for usage in login
+	 */
 	protected calculateHash(req: string): string {
-		return createHash("sha256").update(req).digest("hex");
+		return createHash("sha256")
+			.update(req + HASH_SALT)
+			.digest("hex");
+	}
+
+	/**
+	 * Generate 1 day valid hash for usage in login
+	 */
+	protected calculateHashWithTodaySalt(req: string): string {
+		return this.calculateHash(req + new Date().toISOString().split("T")[0]);
 	}
 }
