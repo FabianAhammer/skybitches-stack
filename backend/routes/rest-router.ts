@@ -1,9 +1,9 @@
 import express from "express";
 import { Db, WithId } from "mongodb";
-import { SkybitchesRouter } from "../model/abstract-skybitches-router.interface";
-import { SessionData, User } from "../model/user";
-import { RestaurantLocation } from "../model/location";
-import { DailyVoting, GeneralVoting } from "../model/voting";
+import { SkybitchesRouter } from "../model/abstract-skybitches-router";
+import { RestaurantLocation } from "../model/db_location";
+import { User, SessionData } from "../../models/user";
+import { DailyVoting, GeneralVoting } from "../../models/voting";
 export class RestRouter extends SkybitchesRouter {
 	constructor(app: express.Express, db: Db) {
 		console.log("Rest Router created");

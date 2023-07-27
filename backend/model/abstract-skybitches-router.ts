@@ -3,7 +3,7 @@ import { Collection, Db } from "mongodb";
 import { createHash } from "node:crypto";
 import { HASH_SALT } from "../env";
 import { SessionData, User } from "./user";
-import { RestaurantLocation } from "./location";
+import { RestaurantLocation } from "./db_location";
 import { DailyVoting } from "./voting";
 /**
  * Router implementing the routes for the Skybitches API.
@@ -187,6 +187,7 @@ export abstract class SkybitchesRouter {
 					votedBy: [],
 				};
 			}),
+			winningLocation: null,
 		};
 
 		if (

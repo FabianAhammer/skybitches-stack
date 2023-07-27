@@ -1,0 +1,9 @@
+{
+	"name": "skybitches",
+	"version": "0.0.0",
+	"private": false,
+	"scripts": {
+		"backend": "cd backend && npm run dev",
+		"frontend": "cd frontend && npm run dev"
+	}
+}

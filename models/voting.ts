@@ -9,7 +9,7 @@ export class DailyVoting {
 	public votedLocations: Array<GeneralVoting>;
 	public requiredVotes: number;
 	public isOpen: boolean;
-	public winningLocation: string;
+	public winningLocation: string | null;
 }
 
 export interface VotingUser {

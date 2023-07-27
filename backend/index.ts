@@ -1,7 +1,7 @@
 import express from "express";
 var bodyParser = require("body-parser");
 import { MongoInstance } from "./connector.js";
-import { RestRouter } from "./routes/rest-router.class.js";
+import { RestRouter } from "./routes/rest-router.js";
 import { Db } from "mongodb";
 const app = express();
 const Axios = require("axios");
