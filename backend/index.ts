@@ -3,6 +3,7 @@ var bodyParser = require("body-parser");
 import { MongoInstance } from "./connector.js";
 import { RestRouter } from "./routes/rest-router.js";
 import { Db } from "mongodb";
+import cors from "cors";
 const app = express();
 const Axios = require("axios");
 const cookieParser = require("cookie-parser");
@@ -10,6 +11,8 @@ const port = 8080;
 
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(cors());
+
 var mongoInstance = null;
 var db: Db;
 

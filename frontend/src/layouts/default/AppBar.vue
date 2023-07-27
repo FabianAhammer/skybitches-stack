@@ -22,15 +22,11 @@
         <v-card>
           <v-card-text>
             <div class="mx-auto text-center">
-              <v-avatar color="brown">
-                <span class="text-h5">{{ user.initials }}</span>
-              </v-avatar>
-              <h3>{{ user.fullName }}</h3>
-              <p class="text-caption mt-1">
-                {{ user.email }}
-              </p>
+              <h4>{{ user.initials }}</h4>
               <v-divider class="my-3"></v-divider>
-              <v-btn rounded variant="text"> Logout </v-btn>
+              <v-btn rounded variant="text" @click="clearCookies()">
+                Logout
+              </v-btn>
             </div>
           </v-card-text>
         </v-card>
@@ -42,14 +38,22 @@
 export default {
   data: () => ({
     user: {
-      initials: "AFA",
-      fullName: "Fabian Ahammer",
-      email: "fabian.ahammer@example.com",
+      initials: "",
     },
     links: [
       { name: "Today", href: "/" },
       { name: "History", href: "/history" },
     ],
   }),
+  methods: {
+    clearCookies() {
+      document.cookie = "";
+      localStorage.removeItem("user");
+      this.$router.push("/login");
+    },
+  },
+  mounted() {
+    this.user.initials = localStorage.getItem("user") ?? "";
+  },
 };
 </script>

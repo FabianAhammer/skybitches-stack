@@ -22,6 +22,11 @@ const routes = [
     component: () => import("@/views/NotFound.vue"),
   },
   {
+    path: "/login",
+    name: "login",
+    component: () => import("@/views/Login.vue"),
+  },
+  {
     path: "/:pathMatch(.*)*",
     redirect: "/page-not-found",
   },
@@ -30,6 +35,12 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+});
+
+router.beforeEach((to, _) => {
+  if (!document.cookie.includes("token") && to.name !== "login") {
+    return { name: "login" };
+  }
 });
 
 export default router;

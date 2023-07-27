@@ -2,9 +2,9 @@ import express from "express";
 import { Collection, Db } from "mongodb";
 import { createHash } from "node:crypto";
 import { HASH_SALT } from "../env";
-import { SessionData, User } from "./user";
+import { SessionData, User } from "../../models/user";
 import { RestaurantLocation } from "./db_location";
-import { DailyVoting } from "./voting";
+import { DailyVoting } from "../../models/voting";
 /**
  * Router implementing the routes for the Skybitches API.
  */

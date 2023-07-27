@@ -9,7 +9,6 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-skeleton-loader></v-skeleton-loader>
     <v-row class="align-center" v-if="votables.length > 0">
       <v-col v-for="entry in votables" :key="entry.name">
         <vote-container
@@ -29,14 +28,23 @@
 </template>
 <script lang="ts">
 import VoteContainer from "@/components/VoteContainer.vue";
+import { DailyVoting } from "../../../models/voting";
+import Axios from "axios";
+
 export default {
   components: {
     VoteContainer,
   },
   data() {
     return {
+      dailyVote: {} as DailyVoting,
       votables: [],
     };
+  },
+  mounted() {
+    Axios.get("http://localhost:3000/api/votes/today").then((response) => {
+      this.dailyVote = response.data;
+    });
   },
 };
 </script>
