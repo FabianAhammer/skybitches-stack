@@ -22,6 +22,7 @@ export abstract class SkybitchesRouter {
 		this.userCollection = db.collection("users");
 		this.sessionCollection = db.collection("session");
 		this.locationCollection = db.collection("location");
+		this.votingCollection = db.collection("voting");
 	}
 
 	public registerRoutes(): void {
@@ -33,9 +34,8 @@ export abstract class SkybitchesRouter {
 
 		this.registerSetVoteByUser();
 		this.registerGetVoteByUser();
-		this.registerGetVotedMenusByUser();
-		this.registerGetVotesForLocation();
-		this.registerGetTodayWinningVoteStatus();
+
+		this.registerGetVotesForLocations();
 
 		this.registerGetLocations();
 
@@ -54,21 +54,24 @@ export abstract class SkybitchesRouter {
 				return;
 			}
 
-			this.getSessionTokenFromDb(req.cookies.token, (token) => {
-				if (token == null) {
+			this.getSessionTokenFromDb(req.cookies.token, (sessionData) => {
+				if (sessionData == null) {
 					res.status(403).send("Invalid token!");
 					return;
 				} else {
 					if (
-						token.token !==
-						this.createSessionTokenWithDate(token.name, token.passwordHash)
+						sessionData.token !==
+						this.createSessionTokenWithDate(
+							sessionData.name,
+							sessionData.passwordHash
+						)
 					) {
 						res.status(400).send("Invalid token!");
-						this.sessionCollection.deleteOne({ token: token.token });
+						this.sessionCollection.deleteOne({ token: sessionData.token });
 						return;
 					} else {
 						//Appends login information to the request
-						req.body["_skybitches_data"] = token;
+						req.body["_skybitches_data"] = sessionData;
 						next();
 					}
 				}
@@ -83,9 +86,7 @@ export abstract class SkybitchesRouter {
 	// voting
 	public abstract registerSetVoteByUser(): void;
 	public abstract registerGetVoteByUser(): void;
-	public abstract registerGetVotedMenusByUser(): void;
-	public abstract registerGetVotesForLocation(): void;
-	public abstract registerGetTodayWinningVoteStatus(): void;
+	public abstract registerGetVotesForLocations(): void;
 
 	//Location
 	public abstract registerGetLocations(): void;
@@ -139,7 +140,8 @@ export abstract class SkybitchesRouter {
 
 	protected async persistSessionToken(
 		name: string,
-		passwordHash: string
+		passwordHash: string,
+		id: string
 	): Promise<string> {
 		const token = this.createSessionTokenWithDate(name, passwordHash);
 		const dbToken = await this.sessionCollection.findOne<SessionData>({
@@ -150,8 +152,49 @@ export abstract class SkybitchesRouter {
 				token: token,
 				passwordHash: passwordHash,
 				name: name,
+				id: id,
 			} as SessionData);
 		}
 		return token;
+	}
+
+	protected getTImeTrimmedDate(date: Date = new Date()): string {
+		return date.toISOString().split("T")[0];
+	}
+
+	protected async createTodayVoting(): Promise<DailyVoting> {
+		const locations: RestaurantLocation[] = await this.locationCollection
+			.find<RestaurantLocation>({})
+			.toArray();
+		const today = this.getTImeTrimmedDate(new Date());
+
+		const isDailyVotingInDb: boolean =
+			(await this.votingCollection.findOne<DailyVoting>({ date: today })) !=
+			null;
+
+		if (isDailyVotingInDb) {
+			throw new Error("Daily voting already exists!");
+		}
+
+		const dailyVotingToday: DailyVoting = {
+			isOpen: true,
+			requiredVotes: 1,
+			date: this.getTImeTrimmedDate(),
+			votedLocations: locations.map((location) => {
+				return {
+					locationid: location.id,
+					locationName: location.name,
+					votedBy: [],
+				};
+			}),
+		};
+
+		if (
+			(await this.votingCollection.insertOne(dailyVotingToday)).acknowledged ==
+			true
+		) {
+			return dailyVotingToday;
+		}
+		throw new Error("Could not create daily voting!");
 	}
 }

@@ -6,5 +6,6 @@ export interface User {
 export interface SessionData {
 	token: string;
 	name: string;
+	id: string;
 	passwordHash: string;
 }
