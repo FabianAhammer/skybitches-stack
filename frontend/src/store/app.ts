@@ -10,3 +10,9 @@ export const useApiStore = defineStore("backend", {
     auth: new LoginUtility(useRouter()),
   }),
 });
+
+export const userStore = defineStore("user", {
+  state: () => ({
+    user: localStorage.getItem("user") as string,
+  }),
+});

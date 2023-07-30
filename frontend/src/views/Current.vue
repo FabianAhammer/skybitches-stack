@@ -1,6 +1,6 @@
 <template>
   <v-container class="flex-fill">
-    <v-row class="align-center" v-if="votables.length === 0">
+    <v-row class="align-center" v-if="dailyVote?.votedLocations?.length === 0">
       <v-col v-for="entry in [1, 2, 3, 4]" :key="entry">
         <v-card loading="true">
           <v-card-text>
@@ -9,18 +9,15 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-row class="align-center" v-if="votables.length > 0">
-      <v-col v-for="entry in votables" :key="entry.name">
+    <v-row class="align-center" v-if="dailyVote?.votedLocations?.length > 0">
+      <v-col v-for="entry in dailyVote.votedLocations" :key="entry.locationid">
         <vote-container
           class="ma-3"
-          :name="entry.name"
-          :votes="entry.votes"
-          :userVoted="entry.userVoted"
-          :isClosed="entry.isClosed"
-          :currentTop="
-            entry.votes ===
-            votables.reduce((a, b) => (a.votes > b.votes ? a : b)).votes
-          "
+          :name="entry.locationName"
+          :votes="entry.votedBy.length"
+          :userVoted="entry.votedBy.map((e) => e.name).includes(user)"
+          :isClosed="false"
+          :currentTop="getIsCurrentTop(entry.locationName)"
         ></vote-container>
       </v-col>
     </v-row>
@@ -28,7 +25,7 @@
 </template>
 <script lang="ts">
 import VoteContainer from "@/components/VoteContainer.vue";
-import { useApiStore } from "@/store/app";
+import { useApiStore, userStore } from "@/store/app";
 import { DailyVoting } from "../../../models/voting";
 
 export default {
@@ -37,12 +34,26 @@ export default {
   },
   data() {
     return {
+      user: userStore().user,
       dailyVote: {} as DailyVoting,
       votables: [],
     };
   },
   async mounted() {
     this.dailyVote = await useApiStore().backend.getDailyVote();
+  },
+  methods: {
+    getIsCurrentTop(locationName: string) {
+      const locationVotes = this.dailyVote.votedLocations.find(
+        (e) => e.locationName === locationName
+      )?.votedBy.length;
+
+      const maxVotes = Math.max(
+        ...this.dailyVote.votedLocations.map((e) => e.votedBy.length)
+      );
+
+      return locationVotes === maxVotes && locationVotes > 0;
+    },
   },
 };
 </script>
