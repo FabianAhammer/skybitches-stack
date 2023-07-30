@@ -1,10 +1,9 @@
 import express from "express";
 import { Db, WithId } from "mongodb";
+import { SessionData, User } from "../../models/user";
+import { DailyVoting, GeneralVoting } from "../../models/voting";
 import { SkybitchesRouter } from "../model/abstract-skybitches-router";
 import { RestaurantLocation } from "../model/db_location";
-import { User, SessionData } from "../../models/user";
-import { DailyVoting, GeneralVoting } from "../../models/voting";
-import cors from "cors";
 export class RestRouter extends SkybitchesRouter {
 	constructor(app: express.Express, db: Db) {
 		console.log("Rest Router created");
@@ -41,6 +40,7 @@ export class RestRouter extends SkybitchesRouter {
 
 	public registerLogin(): void {
 		this.app.post("/login", (req: any, res: any) => {
+			console.log("Post login");
 			if (req?.body?.name == null || req?.body?.password == null) {
 				res.status(400).send("Login failed!");
 				return;
@@ -50,23 +50,22 @@ export class RestRouter extends SkybitchesRouter {
 				name: req.body.name,
 				password: this.calculateHash(req.body.password),
 			};
-
 			this.userCollection
 				.findOne({ name: user.name, password: user.password })
 				.then(async (dbCollecterUser) => {
 					if (dbCollecterUser == null) {
 						res.status(400).send("Login failed!");
 						return;
-					} else {
-						var token: string = await this.persistSessionToken(
-							user.name,
-							user.password,
-							dbCollecterUser._id.toString("base64")
-						);
-						res.cookie("token", token);
-						res.status(200).send("Login successful!");
-						return;
 					}
+
+					var token: string = await this.persistSessionToken(
+						user.name,
+						user.password,
+						dbCollecterUser._id.toString("base64")
+					);
+					console.log(token);
+					res.status(200).send({ token });
+					return;
 				});
 		});
 	}

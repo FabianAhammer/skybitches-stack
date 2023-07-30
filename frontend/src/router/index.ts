@@ -4,6 +4,7 @@ import { createRouter, createWebHistory } from "vue-router";
 const routes = [
   {
     path: "/",
+    name: "home",
     component: () => import("@/layouts/default/Layout.vue"),
     children: [
       {
@@ -38,8 +39,11 @@ const router = createRouter({
 });
 
 router.beforeEach((to, _) => {
-  if (!document.cookie.includes("token") && to.name !== "login") {
+  if (!localStorage.getItem("token") && to.name !== "login") {
     return { name: "login" };
+  }
+  if (localStorage.getItem("token") && to.name === "login") {
+    return { name: "home" };
   }
 });
 

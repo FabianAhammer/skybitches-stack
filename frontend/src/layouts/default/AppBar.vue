@@ -24,9 +24,7 @@
             <div class="mx-auto text-center">
               <h4>{{ user.initials }}</h4>
               <v-divider class="my-3"></v-divider>
-              <v-btn rounded variant="text" @click="clearCookies()">
-                Logout
-              </v-btn>
+              <v-btn rounded variant="text" @click="logout()"> Logout </v-btn>
             </div>
           </v-card-text>
         </v-card>
@@ -35,6 +33,8 @@
   </v-app-bar>
 </template>
 <script lang="ts">
+import { LoginUtility } from "@/util/LoginUtility";
+
 export default {
   data: () => ({
     user: {
@@ -46,9 +46,8 @@ export default {
     ],
   }),
   methods: {
-    clearCookies() {
-      document.cookie = "";
-      localStorage.removeItem("user");
+    logout() {
+      LoginUtility.logout();
       this.$router.push("/login");
     },
   },

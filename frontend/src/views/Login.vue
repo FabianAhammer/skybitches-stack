@@ -34,6 +34,7 @@
 
 <script lang="ts">
 import axios from "axios";
+import { LoginUtility } from "../util/LoginUtility";
 
 export default {
   data: () => ({
@@ -60,15 +61,10 @@ export default {
   methods: {
     async submit(event: SubmitEvent) {
       try {
-        const status = await axios.post("http://localhost:3000/api/login", {
-          name: this.user,
-          password: this.password,
-        });
-        if (status.status !== 200) {
-          throw new Error("Login failed");
+        const isLoggedIn = await LoginUtility.login(this.user, this.password);
+        if (isLoggedIn) {
+          this.$router.push("/");
         }
-        localStorage.setItem("user", this.user);
-        this.$router.push("/");
       } catch (error) {
         console.error(error);
       }
