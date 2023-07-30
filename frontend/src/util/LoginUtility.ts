@@ -1,9 +1,10 @@
 import axios from "axios";
+import { Router } from "vue-router";
 
 export class LoginUtility {
-  private constructor() {}
+  public constructor(private $router: Router) {}
 
-  public static async login(user: string, password: string) {
+  public async login(user: string, password: string) {
     const status = await axios.post("http://localhost:3000/api/login", {
       name: user,
       password: password,
@@ -14,11 +15,14 @@ export class LoginUtility {
 
     localStorage.setItem("token", status.data.token);
     localStorage.setItem("user", user);
-    return true;
+    setTimeout(() => {
+      this.$router.push({ name: "home" });
+    }, 100);
   }
 
-  public static logout() {
+  public logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    this.$router.push({ name: "login" });
   }
 }

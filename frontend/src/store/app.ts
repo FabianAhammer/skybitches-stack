@@ -1,8 +1,12 @@
 // Utilities
-import { defineStore } from 'pinia'
+import { BackendUtility } from "@/util/BackendUtility";
+import { LoginUtility } from "@/util/LoginUtility";
+import { defineStore } from "pinia";
+import { useRouter } from "vue-router";
 
-export const useAppStore = defineStore('app', {
+export const useApiStore = defineStore("backend", {
   state: () => ({
-    //
+    backend: new BackendUtility(useRouter()),
+    auth: new LoginUtility(useRouter()),
   }),
-})
+});

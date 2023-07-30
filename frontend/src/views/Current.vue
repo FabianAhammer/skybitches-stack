@@ -28,8 +28,8 @@
 </template>
 <script lang="ts">
 import VoteContainer from "@/components/VoteContainer.vue";
+import { useApiStore } from "@/store/app";
 import { DailyVoting } from "../../../models/voting";
-import Axios from "axios";
 
 export default {
   components: {
@@ -41,10 +41,8 @@ export default {
       votables: [],
     };
   },
-  mounted() {
-    Axios.get("http://localhost:3000/api/votes/today").then((response) => {
-      this.dailyVote = response.data;
-    });
+  async mounted() {
+    this.dailyVote = await useApiStore().backend.getDailyVote();
   },
 };
 </script>

@@ -49,12 +49,12 @@ export abstract class SkybitchesRouter {
 
 	private ensureLoggedInMiddleware() {
 		this.app.use((req, res, next) => {
-			if (req.cookies.token == undefined) {
+			if (req.headers.token == undefined) {
 				res.status(401).send("No token provided!");
 				return;
 			}
 
-			this.getSessionTokenFromDb(req.cookies.token, (sessionData) => {
+			this.getSessionTokenFromDb(req.headers.token, (sessionData) => {
 				if (sessionData == null) {
 					res.status(403).send("Invalid token!");
 					return;
@@ -115,7 +115,7 @@ export abstract class SkybitchesRouter {
 	}
 
 	protected getSessionTokenFromDb(
-		token: string | undefined,
+		token: string | unknown,
 		callback: (token: SessionData | null) => void
 	): void {
 		if (token == null) {

@@ -33,7 +33,7 @@
   </v-app-bar>
 </template>
 <script lang="ts">
-import { LoginUtility } from "@/util/LoginUtility";
+import { useApiStore } from "@/store/app";
 
 export default {
   data: () => ({
@@ -47,8 +47,7 @@ export default {
   }),
   methods: {
     logout() {
-      LoginUtility.logout();
-      this.$router.push("/login");
+      useApiStore().auth.logout(this.$router);
     },
   },
   mounted() {
