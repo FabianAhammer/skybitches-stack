@@ -40,7 +40,6 @@ export class RestRouter extends SkybitchesRouter {
 
 	public registerLogin(): void {
 		this.app.post("/login", (req: any, res: any) => {
-			console.log("Post login");
 			if (req?.body?.name == null || req?.body?.password == null) {
 				res.status(400).send("Login failed!");
 				return;
@@ -63,7 +62,6 @@ export class RestRouter extends SkybitchesRouter {
 						user.password,
 						dbCollecterUser._id.toString("base64")
 					);
-					console.log(token);
 					res.status(200).send({ token });
 					return;
 				});
@@ -186,8 +184,8 @@ export class RestRouter extends SkybitchesRouter {
 		});
 	}
 
-	public registerGetVoteByUser(): void {}
-	public registerGetVotedMenusByUser(): void {}
+	public registerGetVoteByUser(): void { }
+	public registerGetVotedMenusByUser(): void { }
 
 	public registerGetLocations(): void {
 		this.app.get("/locations", async (req, res) => {
@@ -214,8 +212,8 @@ export class RestRouter extends SkybitchesRouter {
 		});
 	}
 
-	public registerSetMenuEntryForUser(): void {}
-	public registerGetMenuForId(): void {}
-	public registerGetMenuStateToday(): void {}
-	public registerGetMenusTakenForUser(): void {}
+	public registerSetMenuEntryForUser(): void { }
+	public registerGetMenuForId(): void { }
+	public registerGetMenuStateToday(): void { }
+	public registerGetMenusTakenForUser(): void { }
 }

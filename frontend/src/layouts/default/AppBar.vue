@@ -1,12 +1,7 @@
 <template>
   <v-app-bar scroll-behavior="collapse" density="compact">
     <div class="d-flex flex-fill align-center pa-5">
-      <v-btn
-        v-for="link in links"
-        :key="link.name"
-        variant="text"
-        :to="link.href"
-      >
+      <v-btn v-for="link in links" :key="link.name" variant="text" :to="link.href">
         {{ link.name }}
       </v-btn>
       <v-spacer></v-spacer>
@@ -47,7 +42,7 @@ export default {
   }),
   methods: {
     logout() {
-      useApiStore().auth.logout(this.$router);
+      useApiStore().auth.logout();
     },
   },
   mounted() {
