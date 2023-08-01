@@ -64,7 +64,7 @@
 </template>
 <script lang="ts">
 import VoteContainer from "@/components/VoteContainer.vue";
-import { useApiStore, userStore } from "@/store/app";
+import { queueStore, useApiStore, userStore } from "@/store/app";
 import { DailyVoting } from "../../../models/voting";
 import moment from "moment";
 
@@ -76,28 +76,31 @@ export default {
     return {
       user: userStore().user,
       dailyVote: {} as DailyVoting,
-      voteDate: "",
-      voteDay: "",
-      internalVoteDay: -1,
-      iterationOffset: 2,
+      internalVoteDay: -1 as number,
+      iterationOffset: 2 as number,
       days: [] as Array<DateAndDayOfMonth>,
-      dateStruct: [{ dayOfWeek: 0, name: "Sunday" },
-      { dayOfWeek: 1, name: "Monday" },
-      { dayOfWeek: 2, name: "Tuesday" },
-      { dayOfWeek: 3, name: "Wednesday" },
-      { dayOfWeek: 4, name: "Thursday" },
-      { dayOfWeek: 5, name: "Friday" },
-      { dayOfWeek: 6, name: "Saturday" }]
+      dateStruct: [
+        { dayOfWeek: 0, name: "Sunday" },
+        { dayOfWeek: 1, name: "Monday" },
+        { dayOfWeek: 2, name: "Tuesday" },
+        { dayOfWeek: 3, name: "Wednesday" },
+        { dayOfWeek: 4, name: "Thursday" },
+        { dayOfWeek: 5, name: "Friday" },
+        { dayOfWeek: 6, name: "Saturday" }
+      ] as Array<DayOfMonth>
     };
   },
   async mounted() {
     this.dailyVote = await useApiStore().backend.getDailyVote();
     const momentDateToday: moment.Moment = moment(this.dailyVote.date, "YYYY-MM-DD");
-    this.voteDate = momentDateToday.format("DD.MM.YYYY");
-    this.voteDay = momentDateToday.format("dddd");
     this.internalVoteDay = Number.parseFloat(momentDateToday.format("e"));
-
     this.days = this.generateDays(this.internalVoteDay, momentDateToday);
+
+    queueStore().socket.on("SUBSCRIBE", (message) => {
+      console.log(message)
+    })
+
+
   },
   methods: {
     getIsCurrentTop(locationName: string) {

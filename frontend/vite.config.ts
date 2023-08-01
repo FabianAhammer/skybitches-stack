@@ -38,6 +38,14 @@ export default defineConfig({
         cookiePathRewrite: "/",
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
+      "/socket": {
+        target: "http://localhost:3002",
+        changeOrigin: true,
+        secure: false,
+        cookieDomainRewrite: "localhost",
+        cookiePathRewrite: "/",
+        rewrite: (path) => path.replace(/^\/socket/, ""),
+      },
     },
   },
 });

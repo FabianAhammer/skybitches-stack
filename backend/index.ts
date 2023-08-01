@@ -4,8 +4,8 @@ import { MongoInstance } from "./connector.js";
 import { RestRouter } from "./routes/rest-router.js";
 import { Db } from "mongodb";
 import cors from "cors";
+import { MqSocketBridge } from "./sockets/mq-socket-bridge.js";
 const app = express();
-const Axios = require("axios");
 const cookieParser = require("cookie-parser");
 const port = 8080;
 
@@ -21,6 +21,7 @@ mongoInstance = MongoInstance.start().then((instance) => {
 	console.log("Mongo connected!");
 	const router: RestRouter = new RestRouter(app, db);
 	router.registerRoutes();
+	const socketBridge = new MqSocketBridge(router);
 });
 
 app.listen(port, () => {

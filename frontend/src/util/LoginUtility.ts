@@ -1,8 +1,9 @@
+import { queueStore } from "@/store/app";
 import axios from "axios";
 import { Router } from "vue-router";
 
 export class LoginUtility {
-  public constructor(private $router: Router) {}
+  public constructor(private $router: Router) { }
 
   public async login(user: string, password: string) {
     const status = await axios.post("http://localhost:3000/api/login", {
@@ -12,6 +13,8 @@ export class LoginUtility {
     if (status.status !== 200) {
       return false;
     }
+
+
 
     localStorage.setItem("token", status.data.token);
     localStorage.setItem("user", user);

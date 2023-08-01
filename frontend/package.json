@@ -15,6 +15,7 @@
 		"moment": "^2.29.4",
 		"pinia": "^2.0.0",
 		"roboto-fontface": "*",
+		"socket.io-client": "^4.7.1",
 		"vue": "^3.2.0",
 		"vue-router": "^4.0.0",
 		"vuetify": "^3.0.0",
