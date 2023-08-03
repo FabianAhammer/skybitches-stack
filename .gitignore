@@ -4,4 +4,4 @@ data
 env.ts
 node_modules
 dist
-mq
+messagequeue
