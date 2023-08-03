@@ -2,7 +2,7 @@ import { useApiStore } from "@/store/app";
 import axios, { AxiosError } from "axios";
 
 export class AuthenticatedRestUtility {
-  constructor() {}
+  constructor() { }
 
   protected getToken(): string | null {
     return localStorage.getItem("token");
@@ -22,10 +22,9 @@ export class AuthenticatedRestUtility {
           token: this.getToken(),
         },
       });
-
       return response.data;
     } catch (e: AxiosError | any) {
-      if (e.request.status === 401) {
+      if (e.request.status === 401 || e.request.status === 403) {
         const store = useApiStore();
         store.auth.logout();
         return null;

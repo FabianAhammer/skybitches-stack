@@ -16,4 +16,11 @@ export class BackendUtility extends AuthenticatedRestUtility {
       "http://localhost:3000/api/votes/today"
     );
   }
+  public async vote(locationid: string): Promise<void> {
+    return await this.triggerApiCall(
+      REST_METHOD.POST,
+      "http://localhost:3000/api/vote",
+      { locationid }
+    );
+  }
 }

@@ -4,8 +4,9 @@ import { SessionData, User } from "../../models/user";
 import { DailyVoting, GeneralVoting } from "../../models/voting";
 import { SkybitchesRouter } from "../model/abstract-skybitches-router";
 import { RestaurantLocation } from "../model/db_location";
+import { AbstractSocketBridge } from "../model/abstract-socket-bridge";
 export class RestRouter extends SkybitchesRouter {
-	constructor(app: express.Express, db: Db) {
+	constructor(app: express.Express, db: Db, private socketBridge: AbstractSocketBridge) {
 		console.log("Rest Router created");
 		super(app, db);
 	}
@@ -70,7 +71,8 @@ export class RestRouter extends SkybitchesRouter {
 
 	public registerSetVoteByUser(): void {
 		this.app.post("/vote", async (req, res) => {
-			if (!req.body.locationid) {
+			const locationId = req.body.locationid
+			if (!locationId) {
 				res.status(400).send("No location to vote for provided!");
 				return;
 			}
@@ -79,7 +81,7 @@ export class RestRouter extends SkybitchesRouter {
 				.find()
 				.toArray();
 
-			const votedLocation = locations.find((e) => e.id === req.body.locationid);
+			const votedLocation = locations.find((e) => e.id === locationId);
 			if (votedLocation == null) {
 				res.status(400).send("Location not found!");
 				return;
@@ -122,9 +124,8 @@ export class RestRouter extends SkybitchesRouter {
 				res.status(500).send("Error while voting!");
 				return;
 			}
-			res
-				.status(200)
-				.send(await this.votingCollection.findOne({ date: today }));
+			res.status(200);
+			this.socketBridge.notifyVotes(await this.votingCollection.findOne({ date: today }));
 		});
 	}
 

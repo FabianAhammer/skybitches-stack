@@ -9,10 +9,13 @@ import { DailyVoting } from "../../models/voting";
  * Router implementing the routes for the Skybitches API.
  */
 export abstract class SkybitchesRouter {
+
+
 	protected userCollection: Collection<User>;
 	protected sessionCollection: Collection<SessionData>;
 	protected locationCollection: Collection<RestaurantLocation>;
 	protected votingCollection: Collection<DailyVoting>;
+
 
 	constructor(protected app: express.Express, protected db: Db) {
 		console.log(

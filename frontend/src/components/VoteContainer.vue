@@ -4,10 +4,7 @@
       <div class="vote-container__flair bg-orange-darken-2" v-if="currentTop">
         Top
       </div>
-      <div
-        class="vote-container__flair bg-red-darken-4 text-grey-lighten-2"
-        v-if="isClosed"
-      >
+      <div class="vote-container__flair bg-red-darken-4 text-grey-lighten-2" v-if="isClosed">
         Closed
       </div>
     </div>
@@ -19,20 +16,11 @@
         <v-divider class="my-3"></v-divider>
         <v-btn rounded variant="text"> Menu </v-btn>
         <v-divider class="my-3"></v-divider>
-        <v-btn
-          v-if="!isClosed"
-          :class="userVoted ? 'bg-red-darken-3' : 'bg-green-darken-2'"
-          rounded
-          variant="elevated"
-        >
+        <v-btn v-if="!isClosed" :class="userVoted ? 'bg-red-darken-3' : 'bg-green-darken-2'" rounded variant="elevated"
+          @click="$emit('vote', locationId)">
           {{ userVoted ? "Unvote" : "Vote" }}
         </v-btn>
-        <v-btn
-          v-if="isClosed"
-          class="bg-grey-darken-2"
-          rounded
-          variant="elevated"
-        >
+        <v-btn v-if="isClosed" class="bg-grey-darken-2" rounded variant="elevated">
           Closed
         </v-btn>
       </div>
@@ -48,7 +36,9 @@ export default {
     votedBy: Array<String>,
     currentTop: Boolean,
     isClosed: Boolean,
+    locationId: String,
   },
+  emits: ["vote"],
 };
 </script>
 
@@ -62,12 +52,15 @@ export default {
     align-self: flex-end;
     align-items: flex-end;
     transform: rotateZ(35deg) translate(calc(var(--width) / 6));
+
     &--top-voted {
       background: rgb(186, 161, 0);
     }
+
     &--best-of-day {
       background: rgb(103, 7, 144);
     }
+
     &--closed {
       background: rgba(255, 0, 0, 0.73);
     }

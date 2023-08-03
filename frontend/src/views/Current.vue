@@ -56,7 +56,8 @@
         <v-col v-for="entry in dailyVote.votedLocations" :key="entry.locationid">
           <vote-container class="ma-3" :name="entry.locationName" :votes="entry.votedBy.length"
             :userVoted="entry.votedBy.map((e) => e.name).includes(user)" :isClosed="false"
-            :currentTop="getIsCurrentTop(entry.locationName)"></vote-container>
+            :currentTop="getIsCurrentTop(entry.locationName)" :locationId="entry.locationid"
+            @vote="handleVote($event)"></vote-container>
         </v-col>
       </v-row>
     </v-container>
@@ -91,18 +92,21 @@ export default {
     };
   },
   async mounted() {
-    this.dailyVote = await useApiStore().backend.getDailyVote();
-    const momentDateToday: moment.Moment = moment(this.dailyVote.date, "YYYY-MM-DD");
-    this.internalVoteDay = Number.parseFloat(momentDateToday.format("e"));
-    this.days = this.generateDays(this.internalVoteDay, momentDateToday);
+    this.handleVotes(await useApiStore().backend.getDailyVote());
 
     queueStore().socket.on("SUBSCRIBE", (message) => {
-      console.log(message)
+      this.handleVotes(message);
     })
 
 
   },
   methods: {
+    handleVotes(dailyVote: DailyVoting): void {
+      const momentDateToday: moment.Moment = moment(dailyVote.date, "YYYY-MM-DD");
+      this.dailyVote = dailyVote;
+      this.internalVoteDay = Number.parseFloat(momentDateToday.format("e"));
+      this.days = this.generateDays(this.internalVoteDay, momentDateToday);
+    },
     getIsCurrentTop(locationName: string) {
       const locationVotes = this.dailyVote.votedLocations.find(
         (e) => e.locationName === locationName
@@ -140,6 +144,9 @@ export default {
     },
     getDayStruct(dayOfWeek: number): DayOfMonth {
       return this.dateStruct.find(e => e.dayOfWeek === dayOfWeek) || this.dateStruct[0];
+    },
+    async handleVote(locationId: string) {
+      useApiStore().backend.vote(locationId);
     }
   },
 };

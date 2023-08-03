@@ -19,9 +19,9 @@ var db: Db;
 mongoInstance = MongoInstance.start().then((instance) => {
 	db = instance;
 	console.log("Mongo connected!");
-	const router: RestRouter = new RestRouter(app, db);
+	const socketBridge = new MqSocketBridge();
+	const router: RestRouter = new RestRouter(app, db, socketBridge);
 	router.registerRoutes();
-	const socketBridge = new MqSocketBridge(router);
 });
 
 app.listen(port, () => {
