@@ -5,7 +5,8 @@ import amqlib, { Channel } from 'amqplib'
 
 export abstract class AbstractSocketBridge {
 
-    protected io: Socket:
+    protected io: Socket;
+
     protected constructor(private mainRouter: SkybitchesRouter) {
         this.io = require("socket.io")(SOCKET_IO_PORT, {
             transports: ['websocket'],
@@ -18,7 +19,6 @@ export abstract class AbstractSocketBridge {
 
     private setup(): void {
         this.io.on('connection', (socket: Socket) => {
-            console.log(socket.request.headers.authorization);
             this.prepareUserForRooms(socket);
             amqlib.connect({ username: RABBIT_USERNAME, password: RABBIT_PASSWORD, vhost: RABBIT_VHOST }, (err0: any, connection: any) => {
                 if (err0) {

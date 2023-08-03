@@ -23,15 +23,19 @@ services:
       ME_CONFIG_MONGODB_URL: ${MONGO_URL}
 
   rabbitmq:
-    build: ./messagequeue
+    image: rabbitmq:3.12-management
     restart: always
     ports:
       - 5672:5672
       - 15672:15672
-      - 61613:61613
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
       RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
     volumes:
-      - ./mq:/var/lib/rabbitmq
+      - type: bind
+        source: ./messagequeue/rabbitmq-defs.json
+        target: /etc/rabbitmq/rabbitmq-defs.json
+      - type: bind
+        source: ./messagequeue/rabbitmq.conf
+        target: /etc/rabbitmq/rabbitmq.conf
