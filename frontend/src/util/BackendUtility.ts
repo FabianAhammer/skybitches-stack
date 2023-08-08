@@ -1,5 +1,5 @@
 import { Router } from "vue-router";
-import { DailyVoting } from "../../../models/voting";
+import { DailyVoting } from "@/models/voting";
 import {
   AuthenticatedRestUtility,
   REST_METHOD,

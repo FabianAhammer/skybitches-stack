@@ -1,7 +1,7 @@
 import express from "express";
 import { Db, WithId } from "mongodb";
-import { SessionData, User } from "../../models/user";
-import { DailyVoting, GeneralVoting } from "../../models/voting";
+import { SessionData, User } from "../../frontend/src/models/user";
+import { DailyVoting, GeneralVoting } from "../../frontend/src/models/voting";
 import { SkybitchesRouter } from "../model/abstract-skybitches-router";
 import { RestaurantLocation } from "../model/db_location";
 import { AbstractSocketBridge } from "../model/abstract-socket-bridge";

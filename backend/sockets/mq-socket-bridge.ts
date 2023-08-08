@@ -10,7 +10,7 @@ export class MqSocketBridge extends AbstractSocketBridge {
 
     constructor() {
         super();
-        console.log("Socket bride created")
+        console.log("Socket bride created");
     }
 
     protected prepareUserForRooms(socket: Socket): void {
@@ -33,7 +33,7 @@ export class MqSocketBridge extends AbstractSocketBridge {
         this.votePublishChannel = channel;
     }
 
-    public notifyVotes(message: Object | null) {
+    public notifyVotes(message: Object | null): void {
         if (message === null) { return }
         const buffer = Buffer.from(JSON.stringify(message));
         this.votePublishChannel.sendToQueue(RABBIT_VOTE_QUEUE, buffer);

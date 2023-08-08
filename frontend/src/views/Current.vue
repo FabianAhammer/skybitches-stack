@@ -66,7 +66,7 @@
 <script lang="ts">
 import VoteContainer from "@/components/VoteContainer.vue";
 import { queueStore, useApiStore, userStore } from "@/store/app";
-import { DailyVoting } from "../../../models/voting";
+import { DailyVoting, GeneralVoting } from "@/models/voting";
 import moment from "moment";
 
 export default {
@@ -92,13 +92,11 @@ export default {
     };
   },
   async mounted() {
-    this.handleVotes(await useApiStore().backend.getDailyVote());
 
+    this.handleVotes(await useApiStore().backend.getDailyVote());
     queueStore().socket.on("SUBSCRIBE", (message) => {
       this.handleVotes(message);
-    })
-
-
+    });
   },
   methods: {
     handleVotes(dailyVote: DailyVoting): void {
@@ -107,12 +105,12 @@ export default {
       this.internalVoteDay = Number.parseFloat(momentDateToday.format("e"));
       this.days = this.generateDays(this.internalVoteDay, momentDateToday);
     },
-    getIsCurrentTop(locationName: string) {
+    getIsCurrentTop(locationName: string): boolean {
       const locationVotes = this.dailyVote.votedLocations.find(
         (e) => e.locationName === locationName
       )?.votedBy.length;
       const maxVotes = Math.max(
-        ...this.dailyVote.votedLocations.map((e) => e.votedBy.length)
+        ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
       );
       return locationVotes === maxVotes && locationVotes > 0;
     },
@@ -131,7 +129,7 @@ export default {
       }
       return days;
     },
-    iterationFunctionForDays(iterator: number) {
+    iterationFunctionForDays(iterator: number): DayOfMonth {
       if (iterator < 0) {
         return this.getDayStruct(iterator + 7);
       }
@@ -145,7 +143,7 @@ export default {
     getDayStruct(dayOfWeek: number): DayOfMonth {
       return this.dateStruct.find(e => e.dayOfWeek === dayOfWeek) || this.dateStruct[0];
     },
-    async handleVote(locationId: string) {
+    async handleVote(locationId: string): Promise<void> {
       useApiStore().backend.vote(locationId);
     }
   },
@@ -185,3 +183,4 @@ export interface DateAndDayOfMonth extends DayOfMonth {
   }
 }
 </style>
+../../models/voting
