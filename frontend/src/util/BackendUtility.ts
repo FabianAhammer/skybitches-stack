@@ -13,13 +13,13 @@ export class BackendUtility extends AuthenticatedRestUtility {
   public async getDailyVote(): Promise<DailyVoting> {
     return await this.triggerApiCall(
       REST_METHOD.GET,
-      "http://localhost:3000/api/votes/today"
+      "/votes/today"
     );
   }
   public async vote(locationid: string): Promise<void> {
     return await this.triggerApiCall(
       REST_METHOD.POST,
-      "http://localhost:3000/api/vote",
+      "/vote",
       { locationid }
     );
   }

@@ -5,7 +5,7 @@ export class LoginUtility {
   public constructor(private $router: Router) { }
 
   public async login(user: string, password: string) {
-    const status = await axios.post("http://localhost:3000/api/login", {
+    const status = await axios.post(process.env.VITE_BACKEND + "/login", {
       name: user,
       password: password,
     });

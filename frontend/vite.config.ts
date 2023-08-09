@@ -7,7 +7,7 @@ import { defineConfig, loadEnv } from "vite";
 import { fileURLToPath, URL } from "node:url";
 
 // https://vitejs.dev/config/
-export default ({ mode }) => {
+export default ({ mode }: { mode: string }) => {
   Object.assign(process.env, loadEnv(mode, process.cwd()))
   return defineConfig({
     plugins: [
@@ -23,7 +23,9 @@ export default ({ mode }) => {
       }),
     ],
     define: {
-      "process.env": {}
+      "process.env": {
+        ...loadEnv(mode, process.cwd())
+      }
     },
     resolve: {
       alias: [
@@ -35,7 +37,7 @@ export default ({ mode }) => {
       port: parseInt(process.env.VITE_SERVER_PORT || "3002"),
       proxy: {
         "/api": {
-          target: "http://localhost:3000/api/",
+          target: "http://localhost:3001/api/",
           changeOrigin: true,
           secure: false,
           cookieDomainRewrite: "localhost",
