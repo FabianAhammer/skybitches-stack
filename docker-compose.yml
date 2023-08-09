@@ -2,7 +2,7 @@ version: "3.1"
 
 services:
   frontend:
-    build: ./frontend/.
+    image: skybitches-frontent_09_08_23
     ports:
       - 80:80
 

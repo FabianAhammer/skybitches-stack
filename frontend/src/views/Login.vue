@@ -11,12 +11,48 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn block color="primary" type="submit" :loading="loading">
+          <v-btn block color="primary" @click="dialog = true">
             Login
           </v-btn>
         </v-card-actions>
       </v-form>
     </v-card>
+    <v-dialog v-model="dialog" width="auto">
+      <v-card class="mx-auto" width="344">
+        <v-img
+          src="https://media0.giphy.com/media/NTur7XlVDUdqM/giphy.gif?cid=ecf05e475gdkwclmsy45mlx85o315mf0fpe48lyrge9rxqir&ep=v1_gifs_search&rid=giphy.gif"
+          height="200px" cover></v-img>
+
+        <v-card-title>
+          Sike no login found!
+        </v-card-title>
+
+        <v-card-subtitle>
+          Maybe we need more developers?
+        </v-card-subtitle>
+
+        <v-card-actions>
+          <v-btn color="orange-lighten-2" variant="text" @click="dialog = false">
+            Accept Defeat
+          </v-btn>
+
+          <v-spacer></v-spacer>
+
+          <v-btn :icon="show ? 'mdi-chevron-up' : 'mdi-chevron-down'" @click="show = !show"></v-btn>
+        </v-card-actions>
+
+        <v-expand-transition>
+          <div v-show="show">
+            <v-divider></v-divider>
+
+            <v-card-text>
+              Have you really though there is more content here? Lol try going to
+              https://github.com/FabianAhammer/skybitches-stack
+            </v-card-text>
+          </div>
+        </v-expand-transition>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -25,6 +61,8 @@ import { useApiStore } from "@/store/app";
 
 export default {
   data: () => ({
+    dialog: false,
+    show: false,
     user: "",
     password: "",
     loading: false,
@@ -49,6 +87,9 @@ export default {
     async submit() {
       useApiStore().auth.login(this.user, this.password);
     },
+    triggerSike() {
+
+    }
   },
 };
 </script>
