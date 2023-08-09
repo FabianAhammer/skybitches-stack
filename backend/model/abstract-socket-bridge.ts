@@ -1,7 +1,6 @@
 import amqlib, { Channel } from 'amqplib';
 import { Socket } from "socket.io";
 import { RABBIT_PASSWORD, RABBIT_USERNAME, RABBIT_VHOST, SOCKET_IO_PORT } from "../env";
-
 export abstract class AbstractSocketBridge {
     protected io: Socket;
 
