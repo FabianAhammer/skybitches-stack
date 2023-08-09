@@ -1,3 +1,4 @@
+import { EXPRESS_PORT } from "./env.js";
 import express from "express";
 var bodyParser = require("body-parser");
 import { MongoInstance } from "./connector.js";
@@ -7,7 +8,7 @@ import cors from "cors";
 import { MqSocketBridge } from "./sockets/mq-socket-bridge.js";
 const app = express();
 const cookieParser = require("cookie-parser");
-const port = 8080;
+const port = EXPRESS_PORT;
 
 app.use(bodyParser.json());
 app.use(cookieParser());

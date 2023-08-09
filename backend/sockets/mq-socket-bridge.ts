@@ -3,7 +3,6 @@ import { AbstractSocketBridge } from "../model/abstract-socket-bridge";
 import { Channel, Message } from "amqplib";
 import { RABBIT_VOTE_QUEUE } from "../env";
 
-
 export class MqSocketBridge extends AbstractSocketBridge {
     private voteRoom = "vote-room";
     private votePublishChannel: Channel;
@@ -38,5 +37,4 @@ export class MqSocketBridge extends AbstractSocketBridge {
         const buffer = Buffer.from(JSON.stringify(message));
         this.votePublishChannel.sendToQueue(RABBIT_VOTE_QUEUE, buffer);
     }
-
 }
