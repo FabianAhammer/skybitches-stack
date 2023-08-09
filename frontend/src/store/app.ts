@@ -20,7 +20,7 @@ export const userStore = defineStore("user", {
 
 export const queueStore = defineStore("queue", {
   state: () => ({
-    socket: io("http://localhost:3002", { transports: ['websocket'] }),
+    socket: io(process.env.VUE_APP_SOCKET_URL || '', { transports: ['websocket'] }),
   })
 });
 

@@ -10,13 +10,13 @@ export class AuthenticatedRestUtility {
 
   protected async triggerApiCall(
     method: REST_METHOD,
-    url: string,
+    path: string,
     data?: any
   ): Promise<any> {
     try {
       const response = await axios({
         method: method,
-        url: url,
+        url: process.env.VITE_BACKEND + path,
         data: data,
         headers: {
           token: this.getToken(),
