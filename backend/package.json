@@ -5,6 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"dev": "npm run start-db && concurrently \"npx tsc --watch\" \"nodemon -q dist/backend/index.js\" ",
+		"prod": "concurrently \"npx tsc --watch\" \"nodemon -q dist/backend/index.js\" ",
 		"start-db": "docker-compose --env-file .dev-env up -d",
 		"buildWeb": "npx tsc",
 		"build": "echo 'No build found!'"

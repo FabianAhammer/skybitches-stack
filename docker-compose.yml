@@ -3,8 +3,21 @@ version: "3.1"
 services:
   frontend:
     build: ./frontend/.
+    environment:
+      VIRTUAL_HOST: "skybitches.at"
+      VIRTUAL_PORT: 8000
+      # LETSENCRYPT_HOST: "skybitches.at"
     ports:
-      - 80:80
+      - 8000:80
+
+  backend:
+    build: ./backend/.
+    ports:
+      - 3000:3000
+      - 3001:3001
+    restart: always
+    # networks:
+    #   - "net"
 
   mongo:
     image: mongo:6.0.8
@@ -44,3 +57,35 @@ services:
       - type: bind
         source: ./backend/messagequeue/rabbitmq.conf
         target: \etc\rabbitmq\rabbitmq.conf
+
+  reverse-proxy:
+    image: "nginxproxy/nginx-proxy:latest"
+    container_name: "reverse-proxy"
+    volumes:
+      - "./nginx/dhparam:/etc/nginx/dhparam"
+      - "./nginx/vhost:/etc/nginx/vhost.d"
+      - "./nginx/certs:/etc/nginx/certs"
+      - "/var/run/docker.sock:/tmp/docker.sock:ro"
+    restart: "always"
+    # networks:
+    #   - "net"
+    ports:
+      - "80:80"
+      # - "443:443"
+
+  # letsencrypt:
+  #   image: "jrcs/letsencrypt-nginx-proxy-companion:latest"
+  #   container_name: "letsencrypt-helper"
+  #   volumes_from:
+  #     - reverse-proxy
+  #   depends_on:
+  #     - reverse-proxy
+  #   environment:
+  #     NGINX_PROXY_CONTAINER: "reverse-proxy"
+  #     DEFAULT_EMAIL: "tf3kik@gmail.com"
+  #   restart: "always"
+  #   networks:
+  #     - "net"
+# networks:
+#   net:
+#     external: true
