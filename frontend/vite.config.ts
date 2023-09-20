@@ -1,18 +1,18 @@
 // Plugins
 import vue from "@vitejs/plugin-vue";
-import vuetify, { transformAssetUrls } from "vite-plugin-vuetify";
+import vuetify, {transformAssetUrls} from "vite-plugin-vuetify";
 
 // Utilities
-import { defineConfig, loadEnv } from "vite";
-import { fileURLToPath, URL } from "node:url";
+import {defineConfig, loadEnv} from "vite";
+import {fileURLToPath, URL} from "node:url";
 
 // https://vitejs.dev/config/
-export default ({ mode }: { mode: string }) => {
+export default ({mode}: { mode: string }) => {
   Object.assign(process.env, loadEnv(mode, process.cwd()))
   return defineConfig({
     plugins: [
       vue({
-        template: { transformAssetUrls },
+        template: {transformAssetUrls},
       }),
       // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin
       vuetify({
@@ -29,7 +29,7 @@ export default ({ mode }: { mode: string }) => {
     },
     resolve: {
       alias: [
-        { find: "@", replacement: fileURLToPath(new URL("src", import.meta.url)) },
+        {find: "@", replacement: fileURLToPath(new URL("src", import.meta.url))},
       ],
       extensions: [".js", ".json", ".jsx", ".mjs", ".ts", ".tsx", ".vue"],
     },
@@ -43,14 +43,6 @@ export default ({ mode }: { mode: string }) => {
           cookieDomainRewrite: "localhost",
           cookiePathRewrite: "/",
           rewrite: (path) => path.replace(/^\/api/, ""),
-        },
-        "/socket": {
-          target: "http://localhost:3001/socket/",
-          changeOrigin: true,
-          secure: false,
-          cookieDomainRewrite: "localhost",
-          cookiePathRewrite: "/",
-          rewrite: (path) => path.replace(/^\/socket/, ""),
         },
       },
     }

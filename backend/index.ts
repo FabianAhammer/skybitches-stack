@@ -1,29 +1,43 @@
-import { EXPRESS_PORT } from "./env.js";
+import {EXPRESS_PORT} from "./env.js";
 import express from "express";
+
 var bodyParser = require("body-parser");
-import { MongoInstance } from "./connector.js";
-import { RestRouter } from "./routes/rest-router.js";
-import { Db } from "mongodb";
+const {createServer} = require('http')
+import {MongoInstance} from "./impl/MongoDatabaseConnectorImpl";
+import {RestRouterImpl} from "./impl/RestRouterImpl";
+import {Db} from "mongodb";
 import cors from "cors";
-import { MqSocketBridge } from "./sockets/mq-socket-bridge.js";
-const app = express();
+import {WebSocketNotificationImpl} from "./impl/WebSocketNotificationImpl";
+
+const ws = require("ws");
 const cookieParser = require("cookie-parser");
+const expressWs = require('express-ws');
+const app = expressWs(express()).app;
 
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(cors());
+let db: Db;
 
-var mongoInstance = null;
-var db: Db;
+const server = createServer(app)
 
-mongoInstance = MongoInstance.start().then((instance) => {
-	db = instance;
-	console.log("Mongo connected!");
-	const socketBridge = new MqSocketBridge();
-	const router: RestRouter = new RestRouter(app, db, socketBridge);
-	router.registerRoutes();
+const wsServer = new ws.Server({noServer: true});
+MongoInstance.start().then((instance) => {
+    db = instance;
+    console.log("Mongo connected!");
+    const router: RestRouterImpl = new RestRouterImpl(app, db, new WebSocketNotificationImpl(
+        wsServer
+    ));
+    router.registerRoutes();
 });
 
-app.listen(EXPRESS_PORT, () => {
-	console.log(`API Server online on ${EXPRESS_PORT}`);
+
+server.listen(EXPRESS_PORT, () => {
+    console.log(`API Server online on ${EXPRESS_PORT}`);
+});
+
+server.on('upgrade', (request, socket, head) => {
+    wsServer.handleUpgrade(request, socket, head, socket => {
+        wsServer.emit('connection', socket, request);
+    });
 });

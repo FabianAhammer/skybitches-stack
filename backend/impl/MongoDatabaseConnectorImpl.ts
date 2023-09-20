@@ -4,7 +4,7 @@ import {
 	DB_NAME,
 	MONGO_INITDB_ROOT_PASSWORD,
 	MONGO_INITDB_ROOT_USERNAME,
-} from "./env";
+} from "../env";
 
 export class MongoInstance {
 	constructor() {}

@@ -15,8 +15,9 @@
           <v-card-text>
             <v-timeline direction="horizontal" side="start" size="small">
               <template v-for="(day, index) in days" :key="day">
-                <v-timeline-item v-if="index < iterationOffset" :fillDot="true" dotColor="grey-darken-3" icon="mdi-check"
-                  iconColor="green">
+                <v-timeline-item v-if="index < iterationOffset" :fillDot="true" dotColor="grey-darken-3"
+                                 icon="mdi-check"
+                                 iconColor="green">
                   <p class="text-grey-darken-3">
                     {{ day.name }}
                   </p>
@@ -55,9 +56,9 @@
       <v-row class="align-center">
         <v-col v-for="entry in dailyVote.votedLocations" :key="entry.locationid">
           <vote-container class="ma-3" :name="entry.locationName" :votes="entry.votedBy.length"
-            :userVoted="entry.votedBy.map((e) => e.name).includes(user)" :isClosed="false"
-            :currentTop="getIsCurrentTop(entry.locationName)" :locationId="entry.locationid"
-            @vote="handleVote($event)"></vote-container>
+                          :userVoted="entry.votedBy.map((e) => e.name).includes(user)" :isClosed="false"
+                          :currentTop="getIsCurrentTop(entry.locationName)" :locationId="entry.locationid"
+                          @vote="handleVote($event)"></vote-container>
         </v-col>
       </v-row>
     </v-container>
@@ -65,8 +66,8 @@
 </template>
 <script lang="ts">
 import VoteContainer from "@/components/VoteContainer.vue";
-import { queueStore, useApiStore, userStore } from "@/store/app";
-import { DailyVoting, GeneralVoting } from "@/models/voting";
+import {queueStore, useApiStore, userStore} from "@/store/app";
+import {DailyVoting, GeneralVoting} from "@/models/voting";
 import moment from "moment";
 
 export default {
@@ -81,21 +82,21 @@ export default {
       iterationOffset: 2 as number,
       days: [] as Array<DateAndDayOfMonth>,
       dateStruct: [
-        { dayOfWeek: 0, name: "Sunday" },
-        { dayOfWeek: 1, name: "Monday" },
-        { dayOfWeek: 2, name: "Tuesday" },
-        { dayOfWeek: 3, name: "Wednesday" },
-        { dayOfWeek: 4, name: "Thursday" },
-        { dayOfWeek: 5, name: "Friday" },
-        { dayOfWeek: 6, name: "Saturday" }
+        {dayOfWeek: 0, name: "Sunday"},
+        {dayOfWeek: 1, name: "Monday"},
+        {dayOfWeek: 2, name: "Tuesday"},
+        {dayOfWeek: 3, name: "Wednesday"},
+        {dayOfWeek: 4, name: "Thursday"},
+        {dayOfWeek: 5, name: "Friday"},
+        {dayOfWeek: 6, name: "Saturday"}
       ] as Array<DayOfMonth>
     };
   },
   async mounted() {
-
     this.handleVotes(await useApiStore().backend.getDailyVote());
-    queueStore().socket.on("SUBSCRIBE", (message) => {
-      this.handleVotes(message);
+    queueStore().socket.registerVoteListener((voting: MessageEvent<string>) => {
+      console.log("DEBUG - | ", voting.data);
+      this.handleVotes(JSON.parse(voting.data))
     });
   },
   methods: {
@@ -107,10 +108,10 @@ export default {
     },
     getIsCurrentTop(locationName: string): boolean {
       const locationVotes = this.dailyVote.votedLocations.find(
-        (e) => e.locationName === locationName
+          (e) => e.locationName === locationName
       )?.votedBy.length;
       const maxVotes = Math.max(
-        ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
+          ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
       );
       return locationVotes === maxVotes && locationVotes > 0;
     },
@@ -125,18 +126,16 @@ export default {
       for (let i = startDay; i < endDay; i++) {
         const iterator = i + dayToday;
         const date = i < 0 ? moment(momentDate, "YYYY-MM-DD").subtract(Math.abs(i), 'days') : moment(momentDate, "YYYY-MM-DD").add(i, 'days');
-        days.push({ ...this.iterationFunctionForDays(iterator), date: date.format("DD.MM.YYYY") })
+        days.push({...this.iterationFunctionForDays(iterator), date: date.format("DD.MM.YYYY")})
       }
       return days;
     },
     iterationFunctionForDays(iterator: number): DayOfMonth {
       if (iterator < 0) {
         return this.getDayStruct(iterator + 7);
-      }
-      else if (iterator > 6) {
+      } else if (iterator > 6) {
         return this.getDayStruct(iterator - 7);
-      }
-      else {
+      } else {
         return this.getDayStruct(iterator);
       }
     },
