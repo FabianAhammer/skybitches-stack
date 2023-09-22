@@ -8,16 +8,13 @@ services:
       VIRTUAL_PORT: 8000
       # LETSENCRYPT_HOST: "skybitches.at"
     ports:
-      - 8000:80
+      - "8000:8000"
 
   backend:
     build: ./backend/.
     ports:
-      - 3000:3000
-      - 3001:3001
+      - "3000:3000"
     restart: always
-    # networks:
-    #   - "net"
 
   mongo:
     image: mongo:6.0.8
@@ -26,7 +23,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     ports:
-      - 27017:27017
+      - "27017:27017"
     volumes:
       - ./backend/data:\data\db
 
@@ -34,58 +31,8 @@ services:
     image: mongo-express:latest
     restart: always
     ports:
-      - 8081:8081
+      - "8081:8081"
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
       ME_CONFIG_MONGODB_URL: ${MONGO_URL}
-
-  rabbitmq:
-    image: rabbitmq:3.12-management
-    restart: always
-    ports:
-      - 5672:5672
-      - 15672:15672
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
-    volumes:
-      - type: bind
-        source: ./backend/messagequeue/rabbitmq-defs.json
-        target: \etc\rabbitmq\rabbitmq-defs.json
-      - type: bind
-        source: ./backend/messagequeue/rabbitmq.conf
-        target: \etc\rabbitmq\rabbitmq.conf
-
-  reverse-proxy:
-    image: "nginxproxy/nginx-proxy:latest"
-    container_name: "reverse-proxy"
-    volumes:
-      - "./nginx/dhparam:/etc/nginx/dhparam"
-      - "./nginx/vhost:/etc/nginx/vhost.d"
-      - "./nginx/certs:/etc/nginx/certs"
-      - "/var/run/docker.sock:/tmp/docker.sock:ro"
-    restart: "always"
-    # networks:
-    #   - "net"
-    ports:
-      - "80:80"
-      # - "443:443"
-
-  # letsencrypt:
-  #   image: "jrcs/letsencrypt-nginx-proxy-companion:latest"
-  #   container_name: "letsencrypt-helper"
-  #   volumes_from:
-  #     - reverse-proxy
-  #   depends_on:
-  #     - reverse-proxy
-  #   environment:
-  #     NGINX_PROXY_CONTAINER: "reverse-proxy"
-  #     DEFAULT_EMAIL: "tf3kik@gmail.com"
-  #   restart: "always"
-  #   networks:
-  #     - "net"
-# networks:
-#   net:
-#     external: true

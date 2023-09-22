@@ -1,8 +1,9 @@
-import { useApiStore } from "@/store/app";
-import axios, { AxiosError } from "axios";
+import {useApiStore} from "@/store/app";
+import axios, {AxiosError} from "axios";
 
 export class AuthenticatedRestUtility {
-  constructor() { }
+  constructor() {
+  }
 
   protected getToken(): string | null {
     return localStorage.getItem("token");

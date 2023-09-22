@@ -1,5 +1,3 @@
-import {DailyVoting} from "@/models/voting";
-
 export class SocketHandler {
     private voteSocket: WebSocket;
 

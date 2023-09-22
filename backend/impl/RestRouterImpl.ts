@@ -87,6 +87,7 @@ export class RestRouterImpl extends SkybitchesRouter {
 
     public registerSetVoteByUser(): void {
         this.app.post("/vote", async (req, res) => {
+            console.log("voteing in");
             const locationId = req.body.locationid
             if (!locationId) {
                 res.status(400).send("No location to vote for provided!");
@@ -140,13 +141,20 @@ export class RestRouterImpl extends SkybitchesRouter {
                 res.status(500).send("Error while voting!");
                 return;
             }
-            res.status(200);
+            /**
+             * If 200 and no response body is passed, it will go to a 204 (no content) and browser will not continue -> resulting in a stall?
+             */
+            res.status(200).send("Passed voting");
             this.clientServerNotification.notifyDailyVoting(await this.votingCollection.findOne({date: today}));
         });
     }
 
     /**
      * Handles the manipulation of the voting collection, returns success
+     *
+     * @param voting        array of voting
+     * @param voteStatus    today´s voting
+     * @param today         ISO String of date
      */
     private async handleVoteManipulation(
         voting: Array<GeneralVoting>,

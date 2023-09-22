@@ -17,7 +17,7 @@ export class WebSocketNotificationImpl extends AbstractServerClientNotification 
     }
 
     protected notifyUsers(voting: DailyVoting): void {
-        console.log("Notifying users for new votings!");
+        // console.log("Notifying users for new votings!");
         this.clients.forEach(c => c.send(JSON.stringify(voting)));
     }
 }

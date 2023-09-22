@@ -58,6 +58,7 @@
           <vote-container class="ma-3" :name="entry.locationName" :votes="entry.votedBy.length"
                           :userVoted="entry.votedBy.map((e) => e.name).includes(user)" :isClosed="false"
                           :currentTop="getIsCurrentTop(entry.locationName)" :locationId="entry.locationid"
+                          :votedBy="entry.votedBy.map(e => e.name)"
                           @vote="handleVote($event)"></vote-container>
         </v-col>
       </v-row>
@@ -108,10 +109,10 @@ export default {
     },
     getIsCurrentTop(locationName: string): boolean {
       const locationVotes = this.dailyVote.votedLocations.find(
-          (e) => e.locationName === locationName
+        (e) => e.locationName === locationName
       )?.votedBy.length;
       const maxVotes = Math.max(
-          ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
+        ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
       );
       return locationVotes === maxVotes && locationVotes > 0;
     },
@@ -143,7 +144,7 @@ export default {
       return this.dateStruct.find(e => e.dayOfWeek === dayOfWeek) || this.dateStruct[0];
     },
     async handleVote(locationId: string): Promise<void> {
-      useApiStore().backend.vote(locationId);
+      await useApiStore().backend.vote(locationId);
     }
   },
 };
@@ -163,10 +164,10 @@ export interface DateAndDayOfMonth extends DayOfMonth {
 .loading-votings {
   height: 10rem;
   background: radial-gradient(circle,
-      rgba(190, 113, 25, 0.213) 0%,
-      rgb(58, 58, 58) 30%,
-      rgb(58, 58, 58) 70%,
-      rgba(38, 114, 147, 0.226) 100%);
+    rgba(190, 113, 25, 0.213) 0%,
+    rgb(58, 58, 58) 30%,
+    rgb(58, 58, 58) 70%,
+    rgba(38, 114, 147, 0.226) 100%);
   background-size: 200% 100%;
   filter: blur(3rem);
   animation: loading 7s linear infinite backwards;
