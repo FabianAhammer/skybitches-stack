@@ -16,7 +16,7 @@
           <div class="vote-container-voted-bar-entry"></div>
           <h1 class="vote-container-voted-bar-entry">{{ votes }}</h1>
           <div class="vote-container-voted-bar-entry d-flex justify-end">
-            <div v-for="user in votedBy" :key="user" class="vote-container-voted-bar-entry--merging">
+            <div v-for="(user,index) in votedBy" :key="index" class="vote-container-voted-bar-entry--merging">
               <v-avatar color="deep-orange" size="small">
                 <span>{{ user }}</span>
               </v-avatar>
