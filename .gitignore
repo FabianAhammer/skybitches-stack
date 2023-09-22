@@ -6,3 +6,5 @@ node_modules
 dist
 messagequeue
 skybitches-images.tar
+acme.json
+*.bat
