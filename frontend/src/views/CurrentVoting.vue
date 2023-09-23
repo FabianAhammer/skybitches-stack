@@ -1,4 +1,5 @@
 <template>
+  elo
   <v-container class="flex-fill">
     <v-row class="align-center" v-if="dailyVote?.votedLocations?.length === 0">
       <v-col v-for="entry in [1, 2, 3, 4]" :key="entry">
@@ -55,11 +56,17 @@
       </v-row>
       <v-row class="align-center">
         <v-col v-for="entry in dailyVote.votedLocations" :key="entry.locationid">
-          <vote-container class="ma-3" :name="entry.locationName" :votes="entry.votedBy.length"
-                          :userVoted="entry.votedBy.map((e) => e.name).includes(user)" :isClosed="false"
-                          :currentTop="getIsCurrentTop(entry.locationName)" :locationId="entry.locationid"
+          <vote-container class="ma-3"
+                          :name="entry.locationName"
+                          :votes="entry.votedBy.length"
+                          :userVoted="entry.votedBy.map((e) => e.name).includes(user)"
+                          :isClosed="false"
+                          :currentTop="getIsCurrentTop(entry.locationName)"
+                          :tiedForTop="getIsTiedCurrentTop(entry.locationName)"
+                          :locationId="entry.locationid"
                           :votedBy="entry.votedBy.map(e => e.name)"
-                          @vote="handleVote($event)"></vote-container>
+                          @vote="userVote($event)">
+          </vote-container>
         </v-col>
       </v-row>
     </v-container>
@@ -67,9 +74,12 @@
 </template>
 <script lang="ts">
 import VoteContainer from "@/components/VoteContainer.vue";
-import {queueStore, useApiStore, userStore} from "@/store/app";
+import {currentVoteStore, useApiStore, userStore} from "@/store/app";
 import {DailyVoting, GeneralVoting} from "@/models/voting";
 import moment from "moment";
+import {storeToRefs} from "pinia";
+import {watch} from "vue";
+
 
 export default {
   components: {
@@ -94,19 +104,12 @@ export default {
     };
   },
   async mounted() {
-    this.handleVotes(await useApiStore().backend.getDailyVote());
-    queueStore().socket.registerVoteListener((voting: MessageEvent<string>) => {
-      console.log("DEBUG - | ", voting.data);
-      this.handleVotes(JSON.parse(voting.data))
-    });
+    this.dailyVote = storeToRefs(currentVoteStore()).dailyVoting;
+    const momentDateToday: moment.Moment = moment(this.dailyVote.date, "YYYY-MM-DD");
+    this.internalVoteDay = Number.parseFloat(momentDateToday.format("e"));
+    this.days = this.generateDays(this.internalVoteDay, momentDateToday);
   },
   methods: {
-    handleVotes(dailyVote: DailyVoting): void {
-      const momentDateToday: moment.Moment = moment(dailyVote.date, "YYYY-MM-DD");
-      this.dailyVote = dailyVote;
-      this.internalVoteDay = Number.parseFloat(momentDateToday.format("e"));
-      this.days = this.generateDays(this.internalVoteDay, momentDateToday);
-    },
     getIsCurrentTop(locationName: string): boolean {
       const locationVotes = this.dailyVote.votedLocations.find(
         (e) => e.locationName === locationName
@@ -114,9 +117,22 @@ export default {
       const maxVotes = Math.max(
         ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
       );
+
+      if (this.dailyVote.votedLocations.map(e => e.votedBy.length).filter(votes => votes === maxVotes).length > 1) {
+        return false;
+      }
       return locationVotes === maxVotes && locationVotes > 0;
     },
+    getIsTiedCurrentTop(locationName: string): boolean {
+      const locationVotes = this.dailyVote.votedLocations.find(
+        (e) => e.locationName === locationName
+      )?.votedBy.length;
+      const maxVotes = Math.max(
+        ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
+      );
+      return locationVotes === maxVotes && locationVotes > 0 && this.dailyVote.votedLocations.map(e => e.votedBy.length).filter(votes => votes === maxVotes).length > 1;
 
+    },
     generateDays(dayToday: number, momentDate: moment.Moment): Array<DateAndDayOfMonth> {
       if (!dayToday)
         return [];
@@ -143,7 +159,7 @@ export default {
     getDayStruct(dayOfWeek: number): DayOfMonth {
       return this.dateStruct.find(e => e.dayOfWeek === dayOfWeek) || this.dateStruct[0];
     },
-    async handleVote(locationId: string): Promise<void> {
+    async userVote(locationId: string): Promise<void> {
       await useApiStore().backend.vote(locationId);
     }
   },
@@ -183,4 +199,3 @@ export interface DateAndDayOfMonth extends DayOfMonth {
   }
 }
 </style>
-../../models/voting

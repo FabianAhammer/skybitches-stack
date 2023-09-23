@@ -36,8 +36,8 @@ server.listen(EXPRESS_PORT, () => {
     console.log(`API Server online on ${EXPRESS_PORT}`);
 });
 
-server.on('upgrade', (request, socket, head) => {
-    wsServer.handleUpgrade(request, socket, head, socket => {
+server.on('upgrade', (request: any, socket: any, head: any) => {
+    wsServer.handleUpgrade(request, socket, head, (socket: any) => {
         wsServer.emit('connection', socket, request);
     });
 });

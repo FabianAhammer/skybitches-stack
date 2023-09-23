@@ -4,6 +4,7 @@ import {LoginUtility} from "@/util/LoginUtility";
 import {defineStore} from "pinia";
 import {useRouter} from "vue-router";
 import {SocketHandler} from "@/websocket/SocketHandler";
+import {DailyVoting} from "@/models/voting";
 
 export const useApiStore = defineStore("backend", {
     state: () => ({
@@ -24,4 +25,16 @@ export const queueStore = defineStore("queue", {
     })
 });
 
+
+export const currentVoteStore = defineStore("currentVote", {
+    state: () => ({
+        dailyVoting: null as DailyVoting | null
+    }),
+    actions: {
+        setVoting(voting: DailyVoting) {
+            console.log("store mutated");
+            this.dailyVoting = voting;
+        }
+    }
+})
 

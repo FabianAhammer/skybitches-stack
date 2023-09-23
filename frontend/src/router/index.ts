@@ -1,10 +1,10 @@
-// Composables
-import { createRouter, createWebHistory } from "vue-router";
+import {createRouter, createWebHistory} from "vue-router";
 
 const routes = [
   {
     path: "/",
     name: "home",
+    redirect: "/",
     component: () => import("@/layouts/default/Layout.vue"),
     children: [
       {
@@ -13,7 +13,7 @@ const routes = [
         // route level code-splitting
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
-        component: () => import("@/views/CurrentVoting.vue"),
+        component: () => import("@/views/HomeComponent.vue"),
       },
     ],
   },
@@ -40,10 +40,10 @@ const router = createRouter({
 
 router.beforeEach((to, _) => {
   if (!localStorage.getItem("token") && to.name !== "login") {
-    return { name: "login" };
+    return {name: "login"};
   }
   if (localStorage.getItem("token") && to.name === "login") {
-    return { name: "home" };
+    return {name: "home"};
   }
 });
 

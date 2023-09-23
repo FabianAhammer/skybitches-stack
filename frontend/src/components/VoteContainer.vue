@@ -4,6 +4,9 @@
       <div class="vote-container__flair bg-orange-darken-2" v-if="currentTop">
         Top
       </div>
+      <div class="vote-container__flair bg-blue-darken-2" v-if="tiedForTop">
+        Tied
+      </div>
       <div class="vote-container__flair bg-red-darken-4 text-grey-lighten-2" v-if="isClosed">
         Closed
       </div>
@@ -55,6 +58,7 @@ export default {
     userVoted: Boolean,
     votedBy: Array<String>,
     currentTop: Boolean,
+    tiedForTop: Boolean,
     isClosed: Boolean,
     locationId: String,
   },

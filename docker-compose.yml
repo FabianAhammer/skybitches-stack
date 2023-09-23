@@ -1,38 +1,56 @@
-version: "3.1"
-
+version: "3"
 services:
-  frontend:
-    build: ./frontend/.
-    environment:
-      VIRTUAL_HOST: "skybitches.at"
-      VIRTUAL_PORT: 8000
-      # LETSENCRYPT_HOST: "skybitches.at"
+  traefik:
+    container_name: traefik
+    image: traefik:2.6
     ports:
-      - "8000:8000"
-
-  backend:
-    build: ./backend/.
-    ports:
-      - "3000:3000"
-    restart: always
-
-  mongo:
-    image: mongo:6.0.8
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-    ports:
-      - "27017:27017"
+      - "80:80"
+      - "443:443"
+      - "8080:8080" # Dashboard port
     volumes:
-      - ./backend/data:\data\db
-
-  mongo-express:
-    image: mongo-express:latest
-    restart: always
-    ports:
-      - "8081:8081"
+      - ./traefik:/etc/traefik/
+    networks:
+      - proxy # rename this to your custom docker network
+    labels:
+      - "traefik.http.routers.api.rule=Host(`traefik.skybitches.at`)" # Define the subdomain for the traefik dashboard.
+      - "traefik.http.routers.api.entryPoints=https" # Set the Traefik entry point.
+      - "traefik.http.routers.api.service=api@internal" # Enable Traefik API.
+      - "traefik.enable=true" # Enable Traefik reverse proxy for the Traefik dashboard.
+      #traefik.http.routers.api.tls.certresolver: cloudflare
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=skybitchencrypt"
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
-      ME_CONFIG_MONGODB_URL: ${MONGO_URL}
+      DOCKER_HOST: dockersocket
+      CF_DNS_API_TOKEN: mtg0meb2iOuY2HgLSJM8ZdZfCq8x89AJV3dlCtXE
+    restart: unless-stopped
+    depends_on:
+      - dockersocket
+
+  whoami:
+    image: jwilder/whoami
+    ports:
+      - "8000:80"
+    container_name: api
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+    restart: unless-stopped
+
+  dockersocket:
+    container_name: dockersocket
+    image: tecnativa/docker-socket-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - proxy
+    environment:
+      CONTAINERS: 1
+      POST: 0
+    privileged: true
+    restart: unless-stopped
+
+networks:
+  proxy:
+    driver: bridge
+    external: true
