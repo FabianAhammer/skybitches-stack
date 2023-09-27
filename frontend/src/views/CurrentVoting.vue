@@ -1,5 +1,4 @@
 <template>
-  elo
   <v-container class="flex-fill">
     <v-row class="align-center" v-if="dailyVote?.votedLocations?.length === 0">
       <v-col v-for="entry in [1, 2, 3, 4]" :key="entry">
@@ -14,43 +13,7 @@
       <v-row>
         <v-card class="flex-fill text-center">
           <v-card-text>
-            <v-timeline direction="horizontal" side="start" size="small">
-              <template v-for="(day, index) in days" :key="day">
-                <v-timeline-item v-if="index < iterationOffset" :fillDot="true" dotColor="grey-darken-3"
-                                 icon="mdi-check"
-                                 iconColor="green">
-                  <p class="text-grey-darken-3">
-                    {{ day.name }}
-                  </p>
-                  <template v-slot:opposite>
-                    <p class="text-grey-darken-3">
-                      {{ day.date }}
-                    </p>
-                  </template>
-
-                </v-timeline-item>
-                <v-timeline-item v-if="index === iterationOffset" :fillDot="false" dotColor="orange" class="pulse">
-                  <p class="text-orange-lighten-1">
-                    {{ day.name }}
-                  </p>
-                  <template v-slot:opposite>
-                    <p>
-                      {{ day.date }}
-                    </p>
-                  </template>
-                </v-timeline-item>
-                <v-timeline-item v-if="index > iterationOffset" :fillDot="false" dotColor="indigo">
-                  <p class="text-indigo-lighten-1">
-                    {{ day.name }}
-                  </p>
-                  <template v-slot:opposite>
-                    <p class="text-grey-darken-3">
-                      {{ day.date }}
-                    </p>
-                  </template>
-                </v-timeline-item>
-              </template>
-            </v-timeline>
+            <time-line-container></time-line-container>
           </v-card-text>
         </v-card>
       </v-row>
@@ -74,48 +37,33 @@
 </template>
 <script lang="ts">
 import VoteContainer from "@/components/VoteContainer.vue";
+import TimeLineContainer from "@/components/TimeLineContainer.vue";
 import {currentVoteStore, useApiStore, userStore} from "@/store/app";
 import {DailyVoting, GeneralVoting} from "@/models/voting";
-import moment from "moment";
 import {storeToRefs} from "pinia";
-import {watch} from "vue";
 
 
 export default {
   components: {
     VoteContainer,
+    TimeLineContainer
   },
   data() {
     return {
       user: userStore().user,
       dailyVote: {} as DailyVoting,
-      internalVoteDay: -1 as number,
-      iterationOffset: 2 as number,
-      days: [] as Array<DateAndDayOfMonth>,
-      dateStruct: [
-        {dayOfWeek: 0, name: "Sunday"},
-        {dayOfWeek: 1, name: "Monday"},
-        {dayOfWeek: 2, name: "Tuesday"},
-        {dayOfWeek: 3, name: "Wednesday"},
-        {dayOfWeek: 4, name: "Thursday"},
-        {dayOfWeek: 5, name: "Friday"},
-        {dayOfWeek: 6, name: "Saturday"}
-      ] as Array<DayOfMonth>
     };
   },
   async mounted() {
     this.dailyVote = storeToRefs(currentVoteStore()).dailyVoting;
-    const momentDateToday: moment.Moment = moment(this.dailyVote.date, "YYYY-MM-DD");
-    this.internalVoteDay = Number.parseFloat(momentDateToday.format("e"));
-    this.days = this.generateDays(this.internalVoteDay, momentDateToday);
   },
   methods: {
     getIsCurrentTop(locationName: string): boolean {
       const locationVotes = this.dailyVote.votedLocations.find(
-        (e) => e.locationName === locationName
+          (e) => e.locationName === locationName
       )?.votedBy.length;
       const maxVotes = Math.max(
-        ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
+          ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
       );
 
       if (this.dailyVote.votedLocations.map(e => e.votedBy.length).filter(votes => votes === maxVotes).length > 1) {
@@ -125,40 +73,15 @@ export default {
     },
     getIsTiedCurrentTop(locationName: string): boolean {
       const locationVotes = this.dailyVote.votedLocations.find(
-        (e) => e.locationName === locationName
+          (e) => e.locationName === locationName
       )?.votedBy.length;
       const maxVotes = Math.max(
-        ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
+          ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
       );
       return locationVotes === maxVotes && locationVotes > 0 && this.dailyVote.votedLocations.map(e => e.votedBy.length).filter(votes => votes === maxVotes).length > 1;
 
     },
-    generateDays(dayToday: number, momentDate: moment.Moment): Array<DateAndDayOfMonth> {
-      if (!dayToday)
-        return [];
-      const days: Array<DateAndDayOfMonth> = [];
-      //Iterate 7 days - with preset offset (front)
-      const startDay = 0 - this.iterationOffset;
-      const endDay = 6 - this.iterationOffset;
-      for (let i = startDay; i < endDay; i++) {
-        const iterator = i + dayToday;
-        const date = i < 0 ? moment(momentDate, "YYYY-MM-DD").subtract(Math.abs(i), 'days') : moment(momentDate, "YYYY-MM-DD").add(i, 'days');
-        days.push({...this.iterationFunctionForDays(iterator), date: date.format("DD.MM.YYYY")})
-      }
-      return days;
-    },
-    iterationFunctionForDays(iterator: number): DayOfMonth {
-      if (iterator < 0) {
-        return this.getDayStruct(iterator + 7);
-      } else if (iterator > 6) {
-        return this.getDayStruct(iterator - 7);
-      } else {
-        return this.getDayStruct(iterator);
-      }
-    },
-    getDayStruct(dayOfWeek: number): DayOfMonth {
-      return this.dateStruct.find(e => e.dayOfWeek === dayOfWeek) || this.dateStruct[0];
-    },
+
     async userVote(locationId: string): Promise<void> {
       await useApiStore().backend.vote(locationId);
     }
@@ -166,24 +89,16 @@ export default {
 };
 
 
-export interface DayOfMonth {
-  dayOfWeek: number;
-  name: string;
-}
-
-export interface DateAndDayOfMonth extends DayOfMonth {
-  date: string;
-}
 </script>
 
 <style scoped lang="scss">
 .loading-votings {
   height: 10rem;
   background: radial-gradient(circle,
-    rgba(190, 113, 25, 0.213) 0%,
-    rgb(58, 58, 58) 30%,
-    rgb(58, 58, 58) 70%,
-    rgba(38, 114, 147, 0.226) 100%);
+      rgba(190, 113, 25, 0.213) 0%,
+      rgb(58, 58, 58) 30%,
+      rgb(58, 58, 58) 70%,
+      rgba(38, 114, 147, 0.226) 100%);
   background-size: 200% 100%;
   filter: blur(3rem);
   animation: loading 7s linear infinite backwards;

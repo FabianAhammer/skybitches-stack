@@ -1,10 +1,11 @@
 // Utilities
 import {BackendUtility} from "@/util/BackendUtility";
 import {LoginUtility} from "@/util/LoginUtility";
-import {defineStore} from "pinia";
+import {defineStore, storeToRefs} from "pinia";
 import {useRouter} from "vue-router";
 import {SocketHandler} from "@/websocket/SocketHandler";
 import {DailyVoting} from "@/models/voting";
+import {watch} from "vue";
 
 export const useApiStore = defineStore("backend", {
     state: () => ({
@@ -28,13 +29,21 @@ export const queueStore = defineStore("queue", {
 
 export const currentVoteStore = defineStore("currentVote", {
     state: () => ({
-        dailyVoting: null as DailyVoting | null
+        dailyVoting: {} as DailyVoting | null
     }),
     actions: {
+        /**
+         * Subscribe is only triggered if a $patch is executed!
+         *
+         * @param voting daily voting
+         */
         setVoting(voting: DailyVoting) {
-            console.log("store mutated");
-            this.dailyVoting = voting;
-        }
+            console.log("Setting value", voting)
+            this.$patch({dailyVoting: voting});
+        },
+    },
+    getters: {
+        currentVote: (state) => state.dailyVoting
     }
 })
 
