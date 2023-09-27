@@ -16,3 +16,8 @@ export interface VotingUser {
     name: string;
     id: string;
 }
+
+export interface RestaurantLocation {
+    name: string,
+    id: string
+}

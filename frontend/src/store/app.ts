@@ -4,7 +4,7 @@ import {LoginUtility} from "@/util/LoginUtility";
 import {defineStore, storeToRefs} from "pinia";
 import {useRouter} from "vue-router";
 import {SocketHandler} from "@/websocket/SocketHandler";
-import {DailyVoting} from "@/models/voting";
+import {DailyVoting, RestaurantLocation} from "@/models/voting";
 import {watch} from "vue";
 
 export const useApiStore = defineStore("backend", {
@@ -32,18 +32,22 @@ export const currentVoteStore = defineStore("currentVote", {
         dailyVoting: {} as DailyVoting | null
     }),
     actions: {
-        /**
-         * Subscribe is only triggered if a $patch is executed!
-         *
-         * @param voting daily voting
-         */
+        // Subscribe is only triggered if a $patch is executed!
         setVoting(voting: DailyVoting) {
-            console.log("Setting value", voting)
             this.$patch({dailyVoting: voting});
         },
     },
-    getters: {
-        currentVote: (state) => state.dailyVoting
-    }
 })
 
+
+export const locationStore = defineStore("location", {
+    state: () => ({
+        locations: [] as RestaurantLocation[]
+    }),
+    actions: {
+        // Subscribe is only triggered if a $patch is executed!
+        setLocations(locations: RestaurantLocation[]) {
+            this.$patch({locations: locations});
+        },
+    },
+})
