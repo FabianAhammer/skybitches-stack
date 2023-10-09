@@ -1,6 +1,7 @@
 import {AbstractServerClientNotification} from "../model/AbstractServerClientNotification";
-import {DailyVoting} from "../../frontend/src/models/voting";
+import {DailyOrder, DailyVoting, Order} from "../../frontend/src/models/voting";
 import ws from "ws";
+import {WithId} from "mongodb";
 
 export class WebSocketNotificationImpl extends AbstractServerClientNotification {
 
@@ -16,8 +17,8 @@ export class WebSocketNotificationImpl extends AbstractServerClientNotification 
         })
     }
 
-    protected notifyUsers(voting: DailyVoting): void {
-        // console.log("Notifying users for new votings!");
-        this.clients.forEach(c => c.send(JSON.stringify(voting)));
+    protected notifyUsers(data: { voting?: WithId<DailyVoting>, orders?: WithId<DailyOrder> }): void {
+        this.clients.forEach(c => c.send(JSON.stringify(data)));
     }
+
 }

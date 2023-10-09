@@ -1,5 +1,5 @@
 import {Router} from "vue-router";
-import {DailyVoting, RestaurantLocation} from "@/models/voting";
+import {DailyOrder, DailyVoting, RestaurantLocation} from "@/models/voting";
 import {AuthenticatedRestUtility, REST_METHOD,} from "./AuthenticatedRestUtility";
 
 export class BackendUtility extends AuthenticatedRestUtility {
@@ -28,5 +28,37 @@ export class BackendUtility extends AuthenticatedRestUtility {
             REST_METHOD.GET,
             "/locations"
         );
+    }
+
+
+    public async getOrders(): Promise<DailyOrder> {
+        return await this.triggerApiCall(
+            REST_METHOD.GET,
+            "/orders"
+        )
+    }
+
+    public async addOrder(orderId: string): Promise<void> {
+        return await this.triggerApiCall(
+            REST_METHOD.POST,
+            "/order/add",
+            {orderId}
+        )
+    }
+
+    public async removeOrder(orderId: string): Promise<void> {
+        return await this.triggerApiCall(
+            REST_METHOD.POST,
+            "/order/delete",
+            {orderId}
+        )
+    }
+
+    public async copyOrder(orderId: string): Promise<void> {
+        return await this.triggerApiCall(
+            REST_METHOD.POST,
+            "/order/copy",
+            {orderId}
+        )
     }
 }

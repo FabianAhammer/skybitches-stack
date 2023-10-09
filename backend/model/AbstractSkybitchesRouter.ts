@@ -1,10 +1,12 @@
-import express from "express";
-import {Collection, Db} from "mongodb";
+import express, {Request} from "express";
+import {Collection, Db, WithId} from "mongodb";
 import {createHash} from "node:crypto";
 import {HASH_SALT} from "../env";
 import {SessionData, User} from "../../frontend/src/models/user";
 import {RestaurantLocation} from "./RestaurantLocation";
-import {DailyVoting} from "../../frontend/src/models/voting";
+import {DailyOrder, DailyVoting, Order, OrderItem} from "../../frontend/src/models/voting";
+import {OrderLookupException} from "../exceptions/OrderLookupException";
+import {OrderCreationException} from "../exceptions/OrderCreationException";
 
 /**
  * Router implementing the routes for the Skybitches API.
@@ -17,6 +19,7 @@ export abstract class SkybitchesRouter {
     protected sessionCollection: Collection<SessionData>;
     protected locationCollection: Collection<RestaurantLocation>;
     protected votingCollection: Collection<DailyVoting>;
+    protected orderCollection: Collection<DailyOrder>;
 
 
     protected constructor(protected app: express.Express, protected db: Db) {
@@ -28,6 +31,7 @@ export abstract class SkybitchesRouter {
         this.sessionCollection = db.collection("session");
         this.locationCollection = db.collection("location");
         this.votingCollection = db.collection("voting");
+        this.orderCollection = db.collection("dailyOrder");
     }
 
     public registerRoutes(): void {
@@ -38,19 +42,18 @@ export abstract class SkybitchesRouter {
         this.ensureLoggedInMiddleware();
 
         this.registerSetVoteByUser();
-        this.registerGetVoteByUser();
-
         this.registerGetVotesForLocations();
         this.registerDeleteTodaysVoting()
-
         this.registerGetLocations();
 
-        this.registerSetMenuEntryForUser();
         this.registerGetMenuForId();
-        this.registerGetMenuStateToday();
-        this.registerGetMenusTakenForUser();
 
         this.registerAddLocation();
+
+        this.registerGetOrders();
+        this.registerAddOrder();
+        this.removeOrder();
+        this.copyOrder();
     }
 
     private ensureLoggedInMiddleware() {
@@ -93,8 +96,6 @@ export abstract class SkybitchesRouter {
     // voting
     public abstract registerSetVoteByUser(): void;
 
-    public abstract registerGetVoteByUser(): void;
-
     public abstract registerGetVotesForLocations(): void;
 
     public abstract registerDeleteTodaysVoting(): void;
@@ -109,9 +110,13 @@ export abstract class SkybitchesRouter {
 
     public abstract registerGetMenuForId(): void;
 
-    public abstract registerGetMenuStateToday(): void;
+    public abstract registerGetOrders(): void;
 
-    public abstract registerGetMenusTakenForUser(): void;
+    public abstract registerAddOrder(): void;
+
+    public abstract removeOrder(): void;
+
+    public abstract copyOrder(): void;
 
     /**
      * Create hash for usage in login
@@ -128,6 +133,12 @@ export abstract class SkybitchesRouter {
     protected calculateHashWithTodaySalt(req: string): string {
         return this.calculateHash(req + new Date().toISOString().split("T")[0]);
     }
+
+
+    protected getUserDateFromRequest(req: Request): SessionData {
+        return req.body["_skybitches_data"];
+    }
+
 
     protected getSessionTokenFromDb(
         token: string | unknown,
@@ -173,7 +184,7 @@ export abstract class SkybitchesRouter {
         return token;
     }
 
-    protected getTImeTrimmedDate(date: Date = new Date()): string {
+    protected getTimeTrimmedDate(date: Date = new Date()): string {
         return date.toISOString().split("T")[0];
     }
 
@@ -182,7 +193,7 @@ export abstract class SkybitchesRouter {
         const locations: RestaurantLocation[] = await this.locationCollection
             .find<RestaurantLocation>({})
             .toArray();
-        const today = this.getTImeTrimmedDate(new Date());
+        const today = this.getTimeTrimmedDate(new Date());
 
         const isDailyVotingInDb: boolean =
             (await this.votingCollection.findOne<DailyVoting>({date: today})) !=
@@ -195,7 +206,7 @@ export abstract class SkybitchesRouter {
         const dailyVotingToday: DailyVoting = {
             isOpen: true,
             requiredVotes: this.REQUIRED_VOTES_FOR_CLOSING_DAILY_VOTE,
-            date: this.getTImeTrimmedDate(),
+            date: this.getTimeTrimmedDate(),
             votedLocations: locations.map((location) => {
                 return {
                     locationid: location.id,
@@ -207,11 +218,63 @@ export abstract class SkybitchesRouter {
         };
 
         if (
-            (await this.votingCollection.insertOne(dailyVotingToday)).acknowledged ==
-            true
+            (await this.votingCollection.insertOne(dailyVotingToday)).acknowledged
         ) {
             return dailyVotingToday;
         }
         throw new Error("Could not create daily voting!");
     }
+
+    protected async checkTodayRestaurantContainOrderId(id: string): Promise<OrderItem> {
+        const today = await this.lookupTodayOrder();
+        //TODO: Add actual check on menu
+        return {id, name: "Schnitzl", price: 3.5};
+    }
+
+    protected async lookupTodayOrder(): Promise<WithId<DailyOrder>> {
+        const today = this.getTimeTrimmedDate(new Date());
+        const todaysOrder = await this.orderCollection.findOne({date: today});
+        if (todaysOrder) {
+            return todaysOrder;
+        }
+        return this.createTodayOrder(today);
+    }
+
+    private async createTodayOrder(date: string): Promise<WithId<DailyOrder>> {
+        const voteStatus: DailyVoting | null =
+            await this.votingCollection.findOne({date: date});
+        if (voteStatus == null) {
+            throw new OrderLookupException("Failed to lookup orders due to no votes.");
+        }
+
+        if (voteStatus.isOpen) {
+            throw new OrderLookupException("Failed to lookup, voting is not closed");
+        }
+
+        if (!voteStatus.winningLocation) {
+            throw new OrderLookupException("Failed to lookup, no winning location found!");
+        }
+        const winningLocation = await this.locationCollection.findOne({id: voteStatus.winningLocation});
+
+        if (!winningLocation) {
+            throw new OrderLookupException(`Failed to get location ${voteStatus.winningLocation}`);
+        }
+        const order: DailyOrder = {
+            date: date,
+            orders: [],
+            isOpen: true,
+            location: winningLocation
+        }
+
+        if ((await this.orderCollection.insertOne(order)).acknowledged) {
+            const dailyOrder = await this.orderCollection.findOne({date: date});
+            if (dailyOrder) {
+                return dailyOrder;
+            }
+            throw new OrderCreationException("Failure to read daily order after creation!")
+        }
+        throw new OrderCreationException("Failure to insert created daily order!")
+
+    }
+
 }

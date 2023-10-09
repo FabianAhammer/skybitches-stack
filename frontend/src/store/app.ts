@@ -1,11 +1,10 @@
 // Utilities
 import {BackendUtility} from "@/util/BackendUtility";
 import {LoginUtility} from "@/util/LoginUtility";
-import {defineStore, storeToRefs} from "pinia";
+import {defineStore} from "pinia";
 import {useRouter} from "vue-router";
 import {SocketHandler} from "@/websocket/SocketHandler";
-import {DailyVoting, RestaurantLocation} from "@/models/voting";
-import {watch} from "vue";
+import {DailyOrder, DailyVoting, RestaurantLocation} from "@/models/voting";
 
 export const useApiStore = defineStore("backend", {
     state: () => ({
@@ -50,4 +49,15 @@ export const locationStore = defineStore("location", {
             this.$patch({locations: locations});
         },
     },
+})
+
+export const orderStore = defineStore("currentOrder", {
+    state: () => ({
+        dailyOrder: {} as DailyOrder
+    }),
+    actions: {
+        setOrders(order: DailyOrder) {
+            this.$patch({dailyOrder: order});
+        },
+    }
 })

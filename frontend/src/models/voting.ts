@@ -21,3 +21,23 @@ export interface RestaurantLocation {
     name: string,
     id: string
 }
+
+export interface Order {
+    id: string;
+    user: string;
+    orderedItems: OrderItem[];
+}
+
+export interface OrderItem {
+    id: string;
+    name: string;
+    price: number;
+}
+
+
+export interface DailyOrder {
+    date: string;
+    orders: Order[];
+    isOpen: boolean;
+    location: RestaurantLocation;
+}
