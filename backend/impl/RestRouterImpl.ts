@@ -24,7 +24,7 @@ export class RestRouterImpl extends SkybitchesRouter {
 
             const user: User = {
                 name: req.body.name,
-                password: this.calculateHash(req.body.password),
+                password: SkybitchesRouter.calculateHash(req.body.password),
             };
 
             this.userCollection
@@ -52,7 +52,7 @@ export class RestRouterImpl extends SkybitchesRouter {
 
             var user: User = {
                 name: req.body.name,
-                password: this.calculateHash(req.body.password),
+                password: SkybitchesRouter.calculateHash(req.body.password),
             };
             this.userCollection
                 .findOne({name: user.name, password: user.password})

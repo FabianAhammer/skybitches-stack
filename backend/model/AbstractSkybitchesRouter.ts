@@ -121,7 +121,7 @@ export abstract class SkybitchesRouter {
     /**
      * Create hash for usage in login
      */
-    protected calculateHash(req: string): string {
+    public static calculateHash(req: string): string {
         return createHash("sha256")
             .update(req + HASH_SALT)
             .digest("hex");
@@ -131,7 +131,7 @@ export abstract class SkybitchesRouter {
      * Generate 1 day valid hash for usage in login
      */
     protected calculateHashWithTodaySalt(req: string): string {
-        return this.calculateHash(req + new Date().toISOString().split("T")[0]);
+        return SkybitchesRouter.calculateHash(req + new Date().toISOString().split("T")[0]);
     }
 
 

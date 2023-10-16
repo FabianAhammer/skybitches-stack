@@ -8,6 +8,7 @@ import {RestRouterImpl} from "./impl/RestRouterImpl";
 import {Db} from "mongodb";
 import cors from "cors";
 import {WebSocketNotificationImpl} from "./impl/WebSocketNotificationImpl";
+import {SetupUtility} from "./utility/SetupUtility";
 
 const ws = require("ws");
 const cookieParser = require("cookie-parser");
@@ -22,8 +23,9 @@ let db: Db;
 const server = createServer(app)
 
 const wsServer = new ws.Server({noServer: true});
-MongoInstance.start().then((instance) => {
+MongoInstance.start().then(async (instance) => {
     db = instance;
+    await SetupUtility.setupDb(db);
     console.log("Mongo connected!");
     const router: RestRouterImpl = new RestRouterImpl(app, db, new WebSocketNotificationImpl(
         wsServer

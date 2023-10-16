@@ -23,7 +23,7 @@
       </v-card>
     </v-row>
 
-    <v-row v-for="order in dailyOrder.orders" :key="order.id">
+    <v-row v-for="order in dailyOrder.orders.sort((e1,_) => e1.user === user ? -1 : 1 )" :key="order.id">
       <v-card class="flex-fill">
         <v-card-title>
           <v-avatar :color="order.user === user ? 'blue' : 'grey'" size="large">

@@ -53,12 +53,4 @@ export class BackendUtility extends AuthenticatedRestUtility {
             {orderId}
         )
     }
-
-    public async copyOrder(orderId: string): Promise<void> {
-        return await this.triggerApiCall(
-            REST_METHOD.POST,
-            "/order/copy",
-            {orderId}
-        )
-    }
 }
