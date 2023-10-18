@@ -21,9 +21,9 @@ export default {
     }
   },
   async mounted() {
+    this.dailyVote = await useApiStore().backend.getDailyVote();
     locationStore().setLocations(await useApiStore().backend.getLocations());
     orderStore().setOrders(await useApiStore().backend.getOrders());
-    this.dailyVote = await useApiStore().backend.getDailyVote();
     currentVoteStore().setVoting(this.dailyVote);
     queueStore().socket.registerWebSocketMessageListener((message: MessageEvent<string>) => {
       const parseObject: {

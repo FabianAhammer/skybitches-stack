@@ -264,7 +264,17 @@ export class RestRouterImpl extends SkybitchesRouter {
             if (!orderedItem) {
                 return;
             }
-            const dailyOrder: DailyOrder = await this.lookupTodayOrder();
+
+            const dailyOrder: DailyOrder | Error | null = await this.lookupTodayOrder();
+            if (!dailyOrder) {
+                res.status(500).send("Failed to delete, cannot find today orders");
+                return;
+            }
+
+            if (dailyOrder instanceof Error) {
+                res.status(500).send("Failed to lookup orders - " + JSON.stringify(dailyOrder));
+                return;
+            }
             const orderOfUser: Order | undefined = dailyOrder.orders.find(e => e.user === this.getUserDateFromRequest(req).name)
             if (orderOfUser != null) {
                 orderOfUser.orderedItems.push(orderedItem);
@@ -276,12 +286,19 @@ export class RestRouterImpl extends SkybitchesRouter {
                 });
             }
             this.persistAndUpdateDailyOrder(res, dailyOrder);
+
+
         })
     }
 
     public registerGetOrders(): void {
         this.app.get("/orders", async (req, res) => {
             const todayOrders = await this.lookupTodayOrder();
+
+            if (todayOrders == null) {
+                res.status(404).send("No orders found");
+                return;
+            }
             res.status(200).send(todayOrders);
         });
     }
@@ -290,9 +307,18 @@ export class RestRouterImpl extends SkybitchesRouter {
         this.app.post("/order/delete", async (req, res) => {
             const orderedItem = await this.checkRequestForOrderId(req, res);
             if (!orderedItem) {
+                res.status(400).send("Failed to find ordered item");
                 return;
             }
-            const dailyOrder: DailyOrder = await this.lookupTodayOrder();
+            const dailyOrder: WithId<DailyOrder> | Error | null = await this.lookupTodayOrder();
+            if (!dailyOrder) {
+                res.status(500).send("Failed to delete, cannot find today orders");
+                return;
+            }
+            if (dailyOrder instanceof Error) {
+                res.status(500).send("Failed to lookup orders - " + JSON.stringify(dailyOrder));
+                return;
+            }
             const orderOfUser: Order | undefined = dailyOrder.orders.find(e => e.user === this.getUserDateFromRequest(req).name)
             if (orderOfUser != null) {
                 const firstOrderOfItemIdx = orderOfUser.orderedItems.findIndex(e => e.id === orderedItem.id)
@@ -333,6 +359,10 @@ export class RestRouterImpl extends SkybitchesRouter {
         if (!newOrders) {
             res.status(500).send("Failed to load new values of orders of db");
             throw new OrderAddException("Failure to read new values of orders from db!");
+        }
+        if (newOrders instanceof Error) {
+            res.status(500).send("Failed to lookup orders - " + JSON.stringify(dailyOrder));
+            return;
         }
         this.clientServerNotification.notifyOrders(newOrders);
         res.sendStatus(200);

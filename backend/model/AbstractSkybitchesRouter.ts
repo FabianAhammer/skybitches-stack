@@ -231,33 +231,34 @@ export abstract class SkybitchesRouter {
         return {id, name: "Schnitzl", price: 3.5};
     }
 
-    protected async lookupTodayOrder(): Promise<WithId<DailyOrder>> {
+    protected async lookupTodayOrder(): Promise<WithId<DailyOrder> | Error | null> {
         const today = this.getTimeTrimmedDate(new Date());
         const todaysOrder = await this.orderCollection.findOne({date: today});
         if (todaysOrder) {
             return todaysOrder;
         }
         return this.createTodayOrder(today);
+
     }
 
-    private async createTodayOrder(date: string): Promise<WithId<DailyOrder>> {
+    private async createTodayOrder(date: string): Promise<WithId<DailyOrder> | Error | null> {
         const voteStatus: DailyVoting | null =
             await this.votingCollection.findOne({date: date});
         if (voteStatus == null) {
-            throw new OrderLookupException("Failed to lookup orders due to no votes.");
+            return null;
         }
 
         if (voteStatus.isOpen) {
-            throw new OrderLookupException("Failed to lookup, voting is not closed");
+            return new OrderLookupException("Failed to lookup, voting is not closed");
         }
 
         if (!voteStatus.winningLocation) {
-            throw new OrderLookupException("Failed to lookup, no winning location found!");
+            return new OrderLookupException("Failed to lookup, no winning location found!");
         }
         const winningLocation = await this.locationCollection.findOne({id: voteStatus.winningLocation});
 
         if (!winningLocation) {
-            throw new OrderLookupException(`Failed to get location ${voteStatus.winningLocation}`);
+            return new OrderLookupException(`Failed to get location ${voteStatus.winningLocation}`);
         }
         const order: DailyOrder = {
             date: date,
@@ -271,9 +272,9 @@ export abstract class SkybitchesRouter {
             if (dailyOrder) {
                 return dailyOrder;
             }
-            throw new OrderCreationException("Failure to read daily order after creation!")
+            return new OrderCreationException("Failure to read daily order after creation!")
         }
-        throw new OrderCreationException("Failure to insert created daily order!")
+        return new OrderCreationException("Failure to insert created daily order!")
 
     }
 

@@ -37,7 +37,7 @@ export default ({mode}: { mode: string }) => {
       port: parseInt(process.env.VITE_SERVER_PORT || "3002"),
       proxy: {
         "/api": {
-          target: "http://localhost:3001/api/",
+          target: "http://localhost:3000/api/",
           changeOrigin: true,
           secure: false,
           cookieDomainRewrite: "localhost",
