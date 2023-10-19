@@ -1,0 +1,116 @@
+[
+{"name":" Bauernsalat / Farmer´s salad ",
+"price":  9.90}
+,
+
+{"name":" Pasta mit cremigem Pilzragout / Pasta with creamy mushroom ragout ",
+"price":  10.20}
+,
+
+{"name":" Beefsteak Tatar Spoarherd Art ",
+"price":  15.90}
+,
+
+{"name":" Hausgemachte Rindsuppe / Home made beef soup",
+"price":  5.50}
+,
+
+{"name":" Traditionelle Gulaschsuppe Szegediner Art / Traditional Szegedin goulash soup ",
+"price":  6.90}
+,
+
+{"name":" Wochensuppe / Soup of the week",
+"price":  5.90}
+,
+
+{"name":" Schnitzel Wiener Art",
+"price":  14.50}
+,
+
+{"name":" Hühnerpaprikasch / Hungarian chicken paprikash",
+"price":  14.50}
+,
+
+{"name":" Schweinemedaillons im Speckmantel / Pork medallions wrapped in bacon",
+"price":  18.90}
+,
+
+{"name":" Steirer Cordon Bleu ",
+"price":  16.90}
+,
+
+{"name":" Fleischpalatschinken auf Hortobágy Art / Hungarian meat pancake",
+"price":  14.50}
+,
+
+{"name":" Puszta Bowl ",
+"price":  14.70}
+,
+
+{"name":" Gebackener Käse / Baked cheese",
+"price":  14.90}
+,
+
+{"name":" Käsespätzle mit grünem Salat / Cheese spaetzle ",
+"price":  13.90}
+,
+
+{"name":" Letscho - Lecsó",
+"price":  14.40}
+,
+
+{"name":" Superfood Fitness-Salat",
+"price":  14.30}
+,
+
+{"name":" Röstzwiebelbraten Wiener Art / Roasted beef with onions",
+"price":  16.90}
+,
+
+{"name":" Hüttenburger",
+"price":  14.90}
+,
+
+{"name":" Spoarherd Burgermeister / Spoarherd’s Burgermaster",
+"price":  14.20}
+,
+
+{"name":" Veggieburger á la Spoarherd",
+"price":  13.90}
+,
+
+{"name":" Gefüllte Palatschinken / Classic pancake",
+"price":  5.60}
+,
+
+{"name":" Zartbitterschokoladen-Brownie / Dark chocolate brownie",
+"price":  7.70}
+,
+
+{"name":" Knusprig gebackene Zwetschkenpalatschinken / Crispy baked plum pancakes",
+"price":  5.20}
+,
+
+{"name":" Somlauer Nockerl /  Somlauer dumplings ",
+"price":  9.30}
+,
+
+{"name":" Wochendessert - Für die Zuckergoscherl / Dessert of the week",
+"price":  5.90}
+,
+
+{"name":"Klare Gemüsesuppe mit knackigem Gemüse","tag":"wochnspeis",
+"price": 5.90}
+,
+
+{"name":"Faschierte Laibchen mit Kürbis-Kartoffelpüree und Speck-Bohnen","tag":"wochnspeis",
+"price": 9.80}
+,
+
+{"name":"Bakonyer Schnitzel mit Champignon-Rahm-So&szlig;e und Gemüsestrudel","tag":"wochnspeis",
+"price": 9.80}
+,
+
+{"name":"Walnuss-Birne-Frischkäse Schnitte","tag":"wochnspeis",
+"price": 5.90}
+]
