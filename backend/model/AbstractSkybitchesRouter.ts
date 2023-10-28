@@ -4,7 +4,7 @@ import {createHash} from "node:crypto";
 import {HASH_SALT} from "../env";
 import {SessionData, User} from "../../frontend/src/models/user";
 import {RestaurantLocation} from "./RestaurantLocation";
-import {DailyOrder, DailyVoting, OrderItem} from "../../frontend/src/models/base_types";
+import {DailyOrder, DailyVoting, Menu, OrderItem} from "../../frontend/src/models/base_types";
 import {OrderLookupException} from "../exceptions/OrderLookupException";
 import {OrderCreationException} from "../exceptions/OrderCreationException";
 
@@ -20,6 +20,7 @@ export abstract class SkybitchesRouter {
     protected locationCollection: Collection<RestaurantLocation>;
     protected votingCollection: Collection<DailyVoting>;
     protected orderCollection: Collection<DailyOrder>;
+    protected menuCollection: Collection<Menu>;
 
 
     protected constructor(protected app: express.Express, protected db: Db) {
@@ -30,6 +31,7 @@ export abstract class SkybitchesRouter {
         this.userCollection = db.collection("users");
         this.sessionCollection = db.collection("session");
         this.locationCollection = db.collection("location");
+        this.menuCollection = db.collection("menus");
         this.votingCollection = db.collection("voting");
         this.orderCollection = db.collection("dailyOrder");
     }
@@ -188,6 +190,9 @@ export abstract class SkybitchesRouter {
         return date.toISOString().split("T")[0];
     }
 
+    protected async getMenuForLocation(location: RestaurantLocation): Promise<Menu | null> {
+        return await this.menuCollection.findOne({restaurant: location.name});
+    }
 
     protected async createTodayVoting(): Promise<DailyVoting> {
         const locations: RestaurantLocation[] = await this.locationCollection
@@ -203,6 +208,11 @@ export abstract class SkybitchesRouter {
             throw new Error("Daily voting already exists!");
         }
 
+        const menus: Map<string, Menu | null> = new Map();
+        for (const location of locations) {
+            menus.set(location.name, await this.getMenuForLocation(location));
+        }
+
         const dailyVotingToday: DailyVoting = {
             isOpen: true,
             requiredVotes: this.REQUIRED_VOTES_FOR_CLOSING_DAILY_VOTE,
@@ -211,6 +221,8 @@ export abstract class SkybitchesRouter {
                 return {
                     locationid: location.id,
                     locationName: location.name,
+                    dailyFavourite: location.dailyTop,
+                    menu: menus.get(location.name),
                     votedBy: [],
                 };
             }),

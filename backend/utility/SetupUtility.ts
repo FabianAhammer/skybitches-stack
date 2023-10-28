@@ -67,13 +67,14 @@ export class SetupUtility {
 
             const restaurantLocationElement: {
                 name: string,
-                hasMenu: boolean
+                hasMenu: boolean,
+                dailyTop: Array<number>
                 //@ts-ignore
             } = RestaurantLocationList[restaurantLocationListKey];
             await locationCollection.findOne({name: restaurantLocationElement.name})
                 .then(async entry => {
                     if (entry == null) {
-                        const insert: RestaurantLocation = new RestaurantLocation(restaurantLocationElement.name, restaurantLocationElement.hasMenu)
+                        const insert: RestaurantLocation = new RestaurantLocation(restaurantLocationElement.name, restaurantLocationElement.hasMenu, restaurantLocationElement.dailyTop)
                         await locationCollection.insertOne(insert);
                     }
                 })

@@ -10,6 +10,9 @@
       <div class="vote-container__flair bg-red-darken-4 text-grey-lighten-2" v-if="isClosed">
         Closed
       </div>
+      <div class="vote-container__flair bg-green-darken-1" v-if="isDailyFavourite">
+        Favourite
+      </div>
     </div>
     <v-card-text>
       <div class="mx-auto text-center">
@@ -27,7 +30,7 @@
           </div>
         </div>
         <v-divider class="my-3"></v-divider>
-        <v-btn rounded variant="text"> Menu</v-btn>
+        <v-btn rounded variant="text" :disabled="!menu"> Menu</v-btn>
         <v-divider class="my-3"></v-divider>
         <v-btn v-if="!isClosed" :class="userVoted ? 'bg-red-darken-3' : 'bg-green-darken-2'" rounded variant="elevated"
                @click="$emit('vote', locationId)">
@@ -41,56 +44,27 @@
   </v-card>
 </template>
 <script lang="ts">
+import {Menu} from "@/models/base_types";
+import {PropType} from "vue";
+
 export default {
   data() {
-    return {
-      // testUsers: [
-      //   "AFA",
-      //   "AFA",
-      //   "AFA",
-      //   "AFA",
-      // ]
-    }
+    return {}
   },
   props: {
     name: String,
     votes: Number,
     userVoted: Boolean,
+    menu: Object as PropType<Menu> || null,
     votedBy: Array<String>,
     currentTop: Boolean,
+    isDailyFavourite: Boolean,
     tiedForTop: Boolean,
     isClosed: Boolean,
     locationId: String,
   },
   emits: ["vote"],
-  methods: {
-    // getRandomColor(): string {
-    //   switch (Math.floor(Math.random() * 10)) {
-    //     case 0:
-    //       return "red";
-    //     case 1:
-    //       return "green";
-    //     case 2:
-    //       return "pink";
-    //     case 3:
-    //       return "purple";
-    //     case 4:
-    //       return "indigo";
-    //     case 5:
-    //       return "deep-purple";
-    //     case 6:
-    //       return "light-green";
-    //     case 7:
-    //       return "amber";
-    //     case 8:
-    //       return "orange";
-    //     case 9:
-    //       return "blue-grey";
-    //     default:
-    //       return "blue";
-    //   }
-    // }
-  }
+  methods: {}
 };
 </script>
 

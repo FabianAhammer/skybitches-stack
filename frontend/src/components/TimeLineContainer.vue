@@ -71,8 +71,8 @@ export default {
       console.warn("changeOfVote ", voting)
       this.dailyVoting = voting;
       const momentDateToday
-          :
-          moment.Moment = moment(voting.date, "YYYY-MM-DD");
+        :
+        moment.Moment = moment(voting.date, "YYYY-MM-DD");
       const internalVoteDay = Number.parseFloat(momentDateToday.format("e")) ?? -1;
       this.days = this.generateDays(internalVoteDay, momentDateToday);
     },
@@ -91,10 +91,10 @@ export default {
       return days;
     },
     iterationFunctionForDays(iterator
-                                 :
-                                 number
+                               :
+                               number
     ):
-        DayOfMonth {
+      DayOfMonth {
       if (iterator < 0) {
         return this.getDayStruct(iterator + 7);
       } else if (iterator > 6) {
@@ -105,10 +105,10 @@ export default {
     }
     ,
     getDayStruct(dayOfWeek
-                     :
-                     number
+                   :
+                   number
     ):
-        DayOfMonth {
+      DayOfMonth {
       return this.dateStruct.find(e => e.dayOfWeek === dayOfWeek) || this.dateStruct[0];
     }
     ,

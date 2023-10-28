@@ -25,8 +25,10 @@
                           :userVoted="entry.votedBy.map((e) => e.name).includes(user)"
                           :isClosed="false"
                           :currentTop="getIsCurrentTop(entry.locationName)"
+                          :is-daily-favourite="getIsDailyFavourite(entry.locationName)"
                           :tiedForTop="getIsTiedCurrentTop(entry.locationName)"
                           :locationId="entry.locationid"
+                          :menu="entry?.menu ?? null"
                           :votedBy="entry.votedBy.map(e => e.name)"
                           @vote="userVote($event)">
           </vote-container>
@@ -80,6 +82,12 @@ export default {
       );
       return locationVotes === maxVotes && locationVotes > 0 && this.dailyVote.votedLocations.map(e => e.votedBy.length).filter(votes => votes === maxVotes).length > 1;
 
+    },
+
+    getIsDailyFavourite(locationName: string): boolean {
+      return (this.dailyVote.votedLocations.find(
+          (e) => e.locationName === locationName
+      )?.dailyFavourite ?? []).includes(new Date().getDay());
     },
 
     async userVote(locationId: string): Promise<void> {

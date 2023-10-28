@@ -246,7 +246,7 @@ export class RestRouterImpl extends SkybitchesRouter {
             }
             const name = req.body.location_name;
             const hasMenu = req.body.has_menu
-            const location = new RestaurantLocation(name, hasMenu);
+            const location = new RestaurantLocation(name, hasMenu, []);
             await this.locationCollection.insertOne(location);
             res.status(200).send(req.body);
         });
