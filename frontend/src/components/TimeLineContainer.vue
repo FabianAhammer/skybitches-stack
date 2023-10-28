@@ -40,7 +40,7 @@
 
 <script lang="ts">
 import moment from "moment/moment";
-import {DailyVoting} from "@/models/voting";
+import {DailyVoting} from "@/models/base_types";
 import {mapState} from "pinia";
 import {currentVoteStore} from "@/store/app";
 

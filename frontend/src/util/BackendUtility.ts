@@ -1,5 +1,5 @@
 import {Router} from "vue-router";
-import {DailyOrder, DailyVoting, RestaurantLocation} from "@/models/voting";
+import {DailyOrder, DailyVoting, RestaurantLocation} from "@/models/base_types";
 import {AuthenticatedRestUtility, REST_METHOD,} from "./AuthenticatedRestUtility";
 
 export class BackendUtility extends AuthenticatedRestUtility {

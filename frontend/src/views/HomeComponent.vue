@@ -9,7 +9,7 @@ import CurrentVoting from "@/views/CurrentVoting.vue";
 import OrderScreen from "@/views/OrderScreen.vue";
 import {currentVoteStore, locationStore, orderStore, queueStore, useApiStore, userStore} from "@/store/app";
 import {storeToRefs} from "pinia";
-import {DailyOrder, DailyVoting, Order, VotingUser} from "@/models/voting";
+import {DailyOrder, DailyVoting, Order, VotingUser} from "@/models/base_types";
 
 export default {
   methods: {currentVoteStore},

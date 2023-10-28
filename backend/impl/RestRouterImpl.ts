@@ -1,7 +1,7 @@
 import express, {Request, Response} from "express";
 import {Db, WithId} from "mongodb";
 import {SessionData, User} from "../../frontend/src/models/user";
-import {DailyOrder, DailyVoting, GeneralVoting, Order, OrderItem} from "../../frontend/src/models/voting";
+import {DailyOrder, DailyVoting, GeneralVoting, Order, OrderItem} from "../../frontend/src/models/base_types";
 import {SkybitchesRouter} from "../model/AbstractSkybitchesRouter";
 import {RestaurantLocation} from "../model/RestaurantLocation";
 import {ClientServerNotificationInterface} from "../interfaces/ClientServerNotificationInterface";
@@ -228,23 +228,26 @@ export class RestRouterImpl extends SkybitchesRouter {
         this.app.get("/locations", async (req, res) => {
             const locations: RestaurantLocation[] = (
                 await this.locationCollection.find().toArray()
-            ).map((location: WithId<RestaurantLocation>) => {
-                return {name: location.name, id: location.id};
-            });
-
+            );
             res.status(200).send(locations);
         });
     }
 
     public registerAddLocation(): void {
-        this.app.post("/addlocation", (req, res) => {
+        this.app.post("/addlocation", async (req, res) => {
             if (!req?.body?.location_name) {
                 res.status(400).send("No location name provided!");
                 return;
             }
+
+            if (!req?.body?.has_menu) {
+                res.status(400).send("No information on menu!");
+                return;
+            }
             const name = req.body.location_name;
-            const location = new RestaurantLocation(name);
-            this.locationCollection.insertOne(location);
+            const hasMenu = req.body.has_menu
+            const location = new RestaurantLocation(name, hasMenu);
+            await this.locationCollection.insertOne(location);
             res.status(200).send(req.body);
         });
     }

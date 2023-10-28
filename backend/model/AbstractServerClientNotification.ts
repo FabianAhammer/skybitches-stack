@@ -1,5 +1,5 @@
 import {ClientServerNotificationInterface} from "../interfaces/ClientServerNotificationInterface";
-import {DailyOrder, DailyVoting, Order} from "../../frontend/src/models/voting";
+import {DailyOrder, DailyVoting} from "../../frontend/src/models/base_types";
 import {WithId} from "mongodb";
 
 export abstract class AbstractServerClientNotification implements ClientServerNotificationInterface {

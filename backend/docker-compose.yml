@@ -10,7 +10,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ./data:/data/db
+      - mongodb:/data/db
 
   mongo-express:
     image: mongo-express:latest
@@ -18,6 +18,12 @@ services:
     ports:
       - "8081:8081"
     environment:
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
       ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
       ME_CONFIG_MONGODB_URL: ${MONGO_URL}
+
+volumes:
+  mongodb:
+    external: true

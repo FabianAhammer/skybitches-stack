@@ -4,7 +4,7 @@ import {LoginUtility} from "@/util/LoginUtility";
 import {defineStore} from "pinia";
 import {useRouter} from "vue-router";
 import {SocketHandler} from "@/websocket/SocketHandler";
-import {DailyOrder, DailyVoting, RestaurantLocation} from "@/models/voting";
+import {DailyOrder, DailyVoting, RestaurantLocation} from "@/models/base_types";
 
 export const useApiStore = defineStore("backend", {
     state: () => ({

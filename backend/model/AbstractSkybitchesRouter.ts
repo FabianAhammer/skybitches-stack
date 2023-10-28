@@ -4,7 +4,7 @@ import {createHash} from "node:crypto";
 import {HASH_SALT} from "../env";
 import {SessionData, User} from "../../frontend/src/models/user";
 import {RestaurantLocation} from "./RestaurantLocation";
-import {DailyOrder, DailyVoting, Order, OrderItem} from "../../frontend/src/models/voting";
+import {DailyOrder, DailyVoting, OrderItem} from "../../frontend/src/models/base_types";
 import {OrderLookupException} from "../exceptions/OrderLookupException";
 import {OrderCreationException} from "../exceptions/OrderCreationException";
 

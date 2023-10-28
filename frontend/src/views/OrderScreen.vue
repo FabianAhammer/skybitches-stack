@@ -69,7 +69,7 @@
 import {currentVoteStore, locationStore, orderStore, useApiStore, userStore} from "@/store/app";
 import TimeLineContainer from "@/components/TimeLineContainer.vue";
 import {mapState} from "pinia";
-import {RestaurantLocation} from "@/models/voting";
+import {RestaurantLocation} from "@/models/base_types";
 
 export default {
   components: {TimeLineContainer},

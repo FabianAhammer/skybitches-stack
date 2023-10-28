@@ -39,7 +39,7 @@
 import VoteContainer from "@/components/VoteContainer.vue";
 import TimeLineContainer from "@/components/TimeLineContainer.vue";
 import {currentVoteStore, useApiStore, userStore} from "@/store/app";
-import {DailyVoting, GeneralVoting} from "@/models/voting";
+import {DailyVoting, GeneralVoting} from "@/models/base_types";
 import {storeToRefs} from "pinia";
 
 
