@@ -40,13 +40,13 @@
 
 <script lang="ts">
 import moment from "moment/moment";
-import {DailyVoting} from "@/models/base_types";
-import {mapState} from "pinia";
 import {currentVoteStore} from "@/store/app";
+import {DailyVoting} from "@/models/base_types";
 
 export default {
   data() {
     return {
+      dailyVoting: null as unknown as DailyVoting,
       days: [] as Array<DateAndDayOfMonth>,
       iterationOffset: 2 as number,
       dateStruct: [
@@ -61,20 +61,23 @@ export default {
     }
   },
   computed: {
-    ...mapState(currentVoteStore, ['dailyVoting'])
+    // ...mapState(currentVoteStore, ['dailyVoting'])
   },
   mounted() {
-    this.changeOfVote(this.dailyVoting)
+    this.changeOfVote(currentVoteStore().dailyVoting);
+    currentVoteStore().$subscribe((_, state) => {
+      this.changeOfVote(state?.dailyVoting);
+    })
   },
   methods: {
-    changeOfVote(voting: DailyVoting): void {
-      console.warn("changeOfVote ", voting)
-      this.dailyVoting = voting;
-      const momentDateToday
-        :
-        moment.Moment = moment(voting.date, "YYYY-MM-DD");
+    changeOfVote(state: DailyVoting | null): void {
+      if (!state) {
+        return;
+      }
+      const momentDateToday: moment.Moment = moment(state?.date, "YYYY-MM-DD");
       const internalVoteDay = Number.parseFloat(momentDateToday.format("e")) ?? -1;
       this.days = this.generateDays(internalVoteDay, momentDateToday);
+      this.dailyVoting = state;
     },
     generateDays(dayToday: number, momentDate: moment.Moment): Array<DateAndDayOfMonth> {
       if (!dayToday)
@@ -91,10 +94,10 @@ export default {
       return days;
     },
     iterationFunctionForDays(iterator
-                               :
-                               number
+                                 :
+                                 number
     ):
-      DayOfMonth {
+        DayOfMonth {
       if (iterator < 0) {
         return this.getDayStruct(iterator + 7);
       } else if (iterator > 6) {
@@ -105,10 +108,10 @@ export default {
     }
     ,
     getDayStruct(dayOfWeek
-                   :
-                   number
+                     :
+                     number
     ):
-      DayOfMonth {
+        DayOfMonth {
       return this.dateStruct.find(e => e.dayOfWeek === dayOfWeek) || this.dateStruct[0];
     }
     ,

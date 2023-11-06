@@ -12,7 +12,7 @@
     <v-row>
       <v-card class="flex-fill text-center">
         <v-card-title>
-          <h2 class="text-amber-darken-1">{{ dailyOrder.location.name }}</h2>
+          <h2 class="text-amber-darken-1">{{ dailyOrder?.location?.name }}</h2>
         </v-card-title>
         <v-card-subtitle class="pa-5">
           <v-btn class="bg-grey-lighten-1">
@@ -23,14 +23,14 @@
       </v-card>
     </v-row>
 
-    <v-row v-for="order in dailyOrder.orders.sort((e1,_) => e1.user === user ? -1 : 1 )" :key="order.id">
+    <v-row v-for="order in dailyOrder?.orders?.sort((e1,_) => e1.user === user ? -1 : 1 )" :key="order.id">
       <v-card class="flex-fill">
         <v-card-title>
           <v-avatar :color="order.user === user ? 'blue' : 'grey'" size="large">
             {{ order.user }}
           </v-avatar>
         </v-card-title>
-        <v-card-subtitle v-for="(orderItem,index) of order.orderedItems" :key="orderItem.id+index">
+        <v-card-subtitle v-for="(orderItem,index) of order?.orderedItems" :key="orderItem.id+index">
           <v-card :color="user === order.user ? 'blue-darken-4':'blue-grey-darken-3' "
                   class="d-flex pa-1 align-center">
             <div class="pl-2 flex-1-1 text-white text-h6">{{ orderItem.name }}</div>
@@ -80,10 +80,10 @@ export default {
     }
   },
   computed: {
-    ...mapState(currentVoteStore, ['dailyVoting']),
     ...mapState(userStore, ['user']),
     ...mapState(locationStore, ['locations']),
-    ...mapState(orderStore, ['dailyOrder'])
+    ...mapState(currentVoteStore, ['dailyVoting']),
+    ...mapState(orderStore, ['dailyOrder']),
   },
   mounted() {
     if (this.dailyVoting && this.locations.length) {

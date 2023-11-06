@@ -10,7 +10,7 @@
       <div class="vote-container__flair bg-red-darken-4 text-grey-lighten-2" v-if="isClosed">
         Closed
       </div>
-      <div class="vote-container__flair bg-green-darken-1" v-if="isDailyFavourite">
+      <div class="vote-container__flair bg-green-darken-1" v-if="isDailyFavourite && !currentTop">
         Favourite
       </div>
     </div>
@@ -30,7 +30,30 @@
           </div>
         </div>
         <v-divider class="my-3"></v-divider>
-        <v-btn rounded variant="text" :disabled="!menu"> Menu</v-btn>
+        <v-btn rounded variant="text" :disabled="!menu" @click="menuDialogue = true"> Menu</v-btn>
+        <v-dialog width="auto" v-model="menuDialogue">
+          <v-card>
+            <v-card-title class="text-h4 text-center position-sticky bg-grey-darken-4" style="top:0">
+              {{ menu?.restaurant }}
+            </v-card-title>
+            <div class="d-flex flex-fill pa-2" :class="index % 2 == 1 ? 'bg-grey-darken-4' : ''"
+                 v-for="(item,index) in menu?.menuItems" :key="index">
+              <v-card-text class="w-75 text-h7">
+                {{ item.name }}
+              </v-card-text>
+              <v-card-text class="w-25 text-grey-lighten-1 text-end">
+                {{ item.price.toFixed(2) }}€
+              </v-card-text>
+            </div>
+
+          </v-card>
+          <v-btn
+            text="Close"
+            class="bg-orange-darken-2"
+            @click="menuDialogue = false"
+          >
+          </v-btn>
+        </v-dialog>
         <v-divider class="my-3"></v-divider>
         <v-btn v-if="!isClosed" :class="userVoted ? 'bg-red-darken-3' : 'bg-green-darken-2'" rounded variant="elevated"
                @click="$emit('vote', locationId)">
@@ -49,7 +72,9 @@ import {PropType} from "vue";
 
 export default {
   data() {
-    return {}
+    return {
+      menuDialogue: false,
+    }
   },
   props: {
     name: String,
@@ -64,7 +89,8 @@ export default {
     locationId: String,
   },
   emits: ["vote"],
-  methods: {}
+  methods: {
+  }
 };
 </script>
 
