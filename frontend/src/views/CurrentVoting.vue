@@ -28,7 +28,7 @@
                           :is-daily-favourite="getIsDailyFavourite(entry.locationName)"
                           :tiedForTop="getIsTiedCurrentTop(entry.locationName)"
                           :locationId="entry.locationid"
-                          :menu="entry?.menu ?? null"
+                          :menu="entry?.menu || undefined"
                           :votedBy="entry.votedBy.map(e => e.name)"
                           @vote="userVote($event)">
           </vote-container>
@@ -114,7 +114,7 @@ export default {
 
 @keyframes loading {
   0% {
-    background-position: 0% 50%;
+    background-position: 0 50%;
   }
 
   100% {

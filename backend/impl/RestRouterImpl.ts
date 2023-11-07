@@ -1,7 +1,7 @@
 import express, {Request, Response} from "express";
 import {Db, WithId} from "mongodb";
 import {SessionData, User} from "../../frontend/src/models/user";
-import {DailyOrder, DailyVoting, GeneralVoting, Order, OrderItem} from "../../frontend/src/models/base_types";
+import {DailyOrder, DailyVoting, GeneralVoting, MenuItem, Order, OrderItem} from "../../frontend/src/models/base_types";
 import {SkybitchesRouter} from "../model/AbstractSkybitchesRouter";
 import {RestaurantLocation} from "../model/RestaurantLocation";
 import {ClientServerNotificationInterface} from "../interfaces/ClientServerNotificationInterface";
@@ -263,8 +263,9 @@ export class RestRouterImpl extends SkybitchesRouter {
 
     public registerAddOrder(): void {
         this.app.post("/order/add", async (req, res) => {
-            const orderedItem = await this.checkRequestForOrderId(req, res);
+            const orderedItem = await this.checkRequestForOrder(req, res);
             if (!orderedItem) {
+                res.status(400).send("Failed to find ordered item");
                 return;
             }
 
@@ -278,19 +279,48 @@ export class RestRouterImpl extends SkybitchesRouter {
                 res.status(500).send("Failed to lookup orders - " + JSON.stringify(dailyOrder));
                 return;
             }
-            const orderOfUser: Order | undefined = dailyOrder.orders.find(e => e.user === this.getUserDateFromRequest(req).name)
+            const orderOfUser: Order | undefined = dailyOrder.orders.find(e => e.user === this.getUserDateFromRequest(req).name);
             if (orderOfUser != null) {
                 orderOfUser.orderedItems.push(orderedItem);
             } else {
                 dailyOrder.orders.push({
                     user: this.getUserDateFromRequest(req).name,
                     id: randomUUID(),
-                    orderedItems: [orderedItem]
+                    orderedItems: [orderedItem],
+                    voucher: 0
                 });
             }
             this.persistAndUpdateDailyOrder(res, dailyOrder);
+        })
+    }
+
+    public registerAddVoucher(): void {
+        this.app.post("/order/voucher", async (req, res) => {
+            const voucher: number = Number.parseFloat(req.body?.voucher || "0");
+            if (Number.isNaN(voucher)) {
+                res.status(500).send("Failed to parse voucher, not valid!");
+                return;
+            }
 
 
+            const dailyOrder: DailyOrder | Error | null = await this.lookupTodayOrder();
+            if (!dailyOrder) {
+                res.status(500).send("Failed to delete, cannot find today orders");
+                return;
+            }
+
+            if (dailyOrder instanceof Error) {
+                res.status(500).send("Failed to lookup orders - " + JSON.stringify(dailyOrder));
+                return;
+            }
+            const orderOfUser: Order | undefined = dailyOrder.orders.find(e => e.user === this.getUserDateFromRequest(req).name);
+
+            if (orderOfUser == null) {
+                res.status(500).send("Failed to set voucher, no order found for user!");
+                return;
+            }
+            orderOfUser.voucher = voucher;
+            this.persistAndUpdateDailyOrder(res, dailyOrder);
         })
     }
 
@@ -308,10 +338,10 @@ export class RestRouterImpl extends SkybitchesRouter {
 
     public removeOrder(): void {
         this.app.post("/order/delete", async (req, res) => {
-            const orderedItem = await this.checkRequestForOrderId(req, res);
-            if (!orderedItem) {
-                res.status(400).send("Failed to find ordered item");
-                return;
+            const orderItem = req.body?.orderItem;
+            if (!orderItem) {
+                res.status(500).send("Failed to delete, no order item");
+                return null;
             }
             const dailyOrder: WithId<DailyOrder> | Error | null = await this.lookupTodayOrder();
             if (!dailyOrder) {
@@ -323,24 +353,24 @@ export class RestRouterImpl extends SkybitchesRouter {
                 return;
             }
             const orderOfUser: Order | undefined = dailyOrder.orders.find(e => e.user === this.getUserDateFromRequest(req).name)
-            if (orderOfUser != null) {
-                const firstOrderOfItemIdx = orderOfUser.orderedItems.findIndex(e => e.id === orderedItem.id)
-                orderOfUser.orderedItems = orderOfUser.orderedItems.filter((_, i) => i !== firstOrderOfItemIdx);
-                await this.persistAndUpdateDailyOrder(res, dailyOrder);
+            if (orderOfUser == null) {
+                res.status(500).send("Failed to find order to remove");
                 return;
             }
-            res.status(500).send("Failed to find order to remove");
+            const firstOrderOfItemIdx = orderOfUser.orderedItems.findIndex(e => e.id === orderItem.id)
+            orderOfUser.orderedItems = orderOfUser.orderedItems.filter((_, i) => i !== firstOrderOfItemIdx);
+            this.persistAndUpdateDailyOrder(res, dailyOrder);
         })
     }
 
-    private async checkRequestForOrderId(req: Request, res: Response): Promise<OrderItem | null> {
-        if (!req.body?.orderId) {
-            res.status(500).send("Failed to find order item, missing order item");
+    private async checkRequestForOrder(req: Request, res: Response): Promise<OrderItem | null> {
+        if (!req.body?.menuItem) {
+            console.log("No menu item");
             return null;
         }
 
-        const orderId: string = req.body.orderId;
-        const orderedItem: OrderItem = await this.checkTodayRestaurantContainOrderId(orderId);
+        const menuItem: MenuItem = req.body.menuItem;
+        const orderedItem: OrderItem | false = await this.checkTodayRestaurantContainMenuitem(menuItem);
 
         if (!orderedItem) {
             res.status(500).send("Item not in menu!");

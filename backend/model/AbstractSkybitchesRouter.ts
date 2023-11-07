@@ -4,9 +4,10 @@ import {createHash} from "node:crypto";
 import {HASH_SALT} from "../env";
 import {SessionData, User} from "../../frontend/src/models/user";
 import {RestaurantLocation} from "./RestaurantLocation";
-import {DailyOrder, DailyVoting, Menu, OrderItem} from "../../frontend/src/models/base_types";
+import {DailyOrder, DailyVoting, Menu, MenuItem, OrderItem} from "../../frontend/src/models/base_types";
 import {OrderLookupException} from "../exceptions/OrderLookupException";
 import {OrderCreationException} from "../exceptions/OrderCreationException";
+import {randomUUID} from "crypto";
 
 /**
  * Router implementing the routes for the Skybitches API.
@@ -54,6 +55,7 @@ export abstract class SkybitchesRouter {
 
         this.registerGetOrders();
         this.registerAddOrder();
+        this.registerAddVoucher();
         this.removeOrder();
         this.copyOrder();
     }
@@ -115,6 +117,8 @@ export abstract class SkybitchesRouter {
     public abstract registerGetOrders(): void;
 
     public abstract registerAddOrder(): void;
+
+    public abstract registerAddVoucher(): void;
 
     public abstract removeOrder(): void;
 
@@ -237,10 +241,24 @@ export abstract class SkybitchesRouter {
         throw new Error("Could not create daily voting!");
     }
 
-    protected async checkTodayRestaurantContainOrderId(id: string): Promise<OrderItem> {
-        const today = await this.lookupTodayOrder();
-        //TODO: Add actual check on menu
-        return {id, name: "Schnitzl", price: 3.5};
+    protected async getTodaysVotings() {
+        return await this.votingCollection.findOne({date: this.getTimeTrimmedDate(new Date())})
+    }
+
+    protected async checkTodayRestaurantContainMenuitem(menuItem: MenuItem): Promise<OrderItem | false> {
+        const today = await this.getTodaysVotings();
+
+        if (!today) {
+            console.log("No today voting");
+            return false;
+        }
+        const todaysWinningLocation = today.votedLocations.find(e => e.locationid === today?.winningLocation);
+        const foundMenuItem = todaysWinningLocation?.menu?.menuItems?.find(e => e.name === menuItem.name);
+        if (foundMenuItem) {
+            return {...foundMenuItem, id: randomUUID()};
+        }
+        console.log("No item with name found");
+        return false;
     }
 
     protected async lookupTodayOrder(): Promise<WithId<DailyOrder> | Error | null> {

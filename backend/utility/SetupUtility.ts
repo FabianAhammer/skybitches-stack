@@ -42,9 +42,11 @@ export class SetupUtility {
 
     public static async checkAndLoadSpoaherdIfNeeded(db: Db): Promise<void> {
         const menuCollection: Collection<Menu> = db.collection(this.MENU_COLLECTION);
-        await menuCollection.findOne({restaurant: "spoaherd"}).then(entry => {
+        await menuCollection.findOne({restaurant: RestaurantLocationList.spoaherd.name}).then(entry => {
             if (entry == null) {
                 this.loadSpoaherdToDb(db);
+            } else {
+                console.log("Spoaherd here")
             }
         })
     }
