@@ -11,10 +11,17 @@
     </v-row>
     <v-row>
       <v-card class="flex-fill text-center">
-        <v-card-title>
-          <h2 class="text-amber-darken-1">{{ wonGeneralVoting?.locationName }}</h2>
+        <v-card-title class="d-flex align-center justify-space-between" style="gap:3rem">
+          <v-btn variant="flat" class="bg-orange-darken-1" :disabled="!wonGeneralVoting?.menu"
+                 @click="menuDialogue = true">
+            <v-icon icon="mdi mdi-menu"></v-icon>
+            Menu
+          </v-btn>
+          <h2 class="text-grey-lighten-1">{{ wonGeneralVoting?.locationName }}</h2>
+          <div>
+            {{ (dailyOrder.orders.reduce((p1, p2) => p1 + p2.orderedItems.reduce((e1, e2) => e1 + e2.price, 0), 0) ?? 0).toFixed(2)}} €</div>
         </v-card-title>
-        <v-btn rounded variant="text" :disabled="!wonGeneralVoting?.menu" @click="menuDialogue = true"> Menu</v-btn>
+
         <v-dialog width="auto" v-model="menuDialogue">
           <v-card>
             <v-card-title class="text-h4 text-center align-center position-sticky bg-grey-darken-4" style="top:0">
@@ -30,7 +37,7 @@
               </v-card-text>
 
               <v-card-text class="w-10 text-grey-lighten-1 text-center">
-                <v-btn size="32" icon="mdi mdi-plus" class="bg-orange-darken-1 v-btn--size-small"
+                <v-btn size="32" icon="mdi mdi-plus" class="bg-orange-darken-1"
                        @click="add(item)"></v-btn>
               </v-card-text>
             </div>
@@ -46,8 +53,10 @@
       </v-card>
     </v-row>
 
-    <v-row v-for="order in dailyOrder?.orders?.sort((e1,_) => e1.user === user ? -1 : 1 )" :key="order.id">
-      <v-card class="ma-2 w-33" v-if="order.orderedItems.length">
+    <v-container class="grid">
+      <v-card
+          v-for="order in dailyOrder?.orders?.sort((e1,_) => e1.user === user ? -1 : 1 ).filter(e => e.orderedItems.length > 0)"
+          :key="order.id" class="ma-2 w-100">
         <v-card-title>
           <div class="d-flex w-100">
             <v-avatar :color="order.user === user ? 'blue' : 'grey'" size="large">
@@ -64,7 +73,7 @@
             <v-card-text class="w-25 d-flex text-grey-lighten-1 align-center justify-center text-end">
               {{ orderItem.price.toFixed(2) }}€
             </v-card-text>
-            <v-card-text class="d-flex align-center justify-center">
+            <v-card-text class="d-flex align-center justify-center w-25">
               <v-btn variant="plain" density="compact" v-if="order.user === user" @click="remove(orderItem)">
                 <v-icon class="text-red-accent-2">mdi-delete</v-icon>
               </v-btn>
@@ -75,31 +84,47 @@
           </div>
         </div>
         <v-card-subtitle style="border-top:1px dashed grey;" class="d-flex pa-3">
-          <div></div>
           <v-form :disabled="order.user !== user || disable" v-model="validVoucherApply" class="w-100 d-flex">
-            <v-text-field class="w-100"
-                          v-model="voucher"
-                          :placeholder="(order.voucher??0)+'€'"
-                          type="text"
-                          label="Gutschein"
-                          :rules="voucherRules"
-                          append-inner-icon="mdi mdi-currency-eur"
+            <v-text-field
+                v-if="order.user === user"
+                class="w-100"
+                v-model=" voucher "
+                :placeholder="(order.voucher??0)+'€'"
+                type="text"
+                label="Gutschein"
+                :rules="voucherRules"
+                append-inner-icon="mdi mdi-currency-eur"
             ></v-text-field>
-            <v-btn icon="mdi mdi-check" variant="text" class="text-green-accent-1" @click="applyVoucher()"
+            <div v-if="order.user !== user" class="flex-fill d-flex">
+              <v-card-text class="w-75 text-h7">
+                Gutschein
+              </v-card-text>
+              <v-card-text class="w-25 d-flex text-green-lighten-1 align-center justify-center text-end">
+                - {{ order.voucher.toFixed(2) }}€
+              </v-card-text>
+
+              <v-card-text class="d-flex align-center justify-center w-25">
+              </v-card-text>
+            </div>
+            <v-btn v-if="order.user === user" icon="mdi mdi-check" variant="text" class="text-green-accent-1"
+                   @click="applyVoucher()"
                    :disabled="!validVoucherApply">
             </v-btn>
           </v-form>
         </v-card-subtitle>
         <v-card-subtitle style="border-top:1px dashed grey; padding:  1rem 0"
-                         class="d-flex ">
-          <span class="w-75 text-center pa-1">Summe</span>
-          <span class="w-25 text-center pa-1">
-          {{ (order.orderedItems.reduce((e1, e2) => e1 + e2.price, 0) - (order?.voucher ?? 0)).toFixed(2) }} €
-          </span>
-          <span class="w-25 " style="padding-left: 3rem"></span>
+                         class="d-flex pa-3">
+          <v-card-text class="w-75 text-h7">
+            Summe
+          </v-card-text>
+          <v-card-text class="w-25 d-flex font-weight-bold align-center justify-center text-end">
+            {{ (order.orderedItems.reduce((e1, e2) => e1 + e2.price, 0) - (order?.voucher ?? 0)).toFixed(2) }} €
+          </v-card-text>
+          <v-card-text class="d-flex align-center justify-center w-25">
+          </v-card-text>
         </v-card-subtitle>
       </v-card>
-    </v-row>
+    </v-container>
   </v-container>
 </template>
 
@@ -128,7 +153,7 @@ export default {
           if (Number.isNaN(Number.parseFloat(value))) {
             return "Must be number"
           }
-          return true
+          return true;
         }
       ]
     }
@@ -167,4 +192,9 @@ export default {
 
 <style scoped lang="scss">
 
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
 </style>
