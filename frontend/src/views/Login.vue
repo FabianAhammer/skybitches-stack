@@ -19,7 +19,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn block color="primary" type="submit" :loading="loading">
+          <v-btn block class="bg-orange-accent-3" type="submit" :loading="loading">
             <span>I am 18+ continue</span>
             <v-icon>mdi mdi-arrow-right</v-icon>
           </v-btn>
