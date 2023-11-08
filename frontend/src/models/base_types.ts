@@ -58,3 +58,9 @@ export interface MenuItem {
   price: number;
   tag?: string;
 }
+
+export interface UiError {
+  title: string;
+  text: string;
+  code?: string;
+}

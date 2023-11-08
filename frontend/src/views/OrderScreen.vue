@@ -96,7 +96,7 @@
           </div>
         </div>
         <v-card-subtitle style="border-top:1px dashed grey;" class="d-flex pa-3">
-          <v-form :disabled="order.user !== user || !currentOrderingsDisplayed.isOpen" v-model="validVoucherApply"
+          <v-form :disabled="order.user !== user || !currentOrderingsDisplayed?.isOpen" v-model="validVoucherApply"
                   class="w-100 d-flex">
             <v-text-field
               v-if="order.user === user && currentOrderingsDisplayed?.isOpen"

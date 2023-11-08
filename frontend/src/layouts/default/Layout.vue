@@ -7,8 +7,17 @@
       </v-container>
     </v-main>
   </v-app>
+
 </template>
 
-<script lang="ts" setup>
+<script lang="ts">
 import AppBar from "@/layouts/default/AppBar.vue";
+
+
+export default {
+  components: {
+    AppBar
+  }
+}
+
 </script>

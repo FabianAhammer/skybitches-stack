@@ -4,7 +4,7 @@ import {LoginUtility} from "@/util/LoginUtility";
 import {defineStore} from "pinia";
 import {useRouter} from "vue-router";
 import {SocketHandler} from "@/websocket/SocketHandler";
-import {DailyOrder, DailyVoting, RestaurantLocation} from "@/models/base_types";
+import {DailyOrder, DailyVoting, RestaurantLocation, UiError} from "@/models/base_types";
 
 export const useApiStore = defineStore("backend", {
     state: () => ({
@@ -59,5 +59,16 @@ export const orderStore = defineStore("currentOrder", {
         setOrders(order: DailyOrder) {
             this.$patch({dailyOrder: order});
         },
+    }
+})
+
+export const errorStore = defineStore("errorStore", {
+    state: () => ({
+        error: {} as UiError
+    }),
+    actions: {
+        raiseError(error: UiError) {
+            this.$patch({error});
+        }
     }
 })
