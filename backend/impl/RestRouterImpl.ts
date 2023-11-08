@@ -10,11 +10,13 @@ import {OrderAddException} from "../exceptions/OrderAddException";
 import {randomUUID} from "crypto";
 
 export class RestRouterImpl extends SkybitchesRouter {
+
     constructor(app: express.Express, db: Db, private clientServerNotification: ClientServerNotificationInterface) {
         console.log("Rest Router created");
         super(app, db);
     }
 
+    //#region RestMapper
     public registerCreateUser(): void {
         this.app.post("/createuser", (req: any, res: any) => {
             if (req?.body?.name == null || req?.body?.password == null) {
@@ -252,20 +254,16 @@ export class RestRouterImpl extends SkybitchesRouter {
         });
     }
 
-    public registerSetMenuEntryForUser(): void {
-    }
-
-    public registerGetMenuForId(): void {
-    }
-
-    public copyOrder(): void {
-    }
-
     public registerAddOrder(): void {
         this.app.post("/order/add", async (req, res) => {
             const orderedItem = await this.checkRequestForOrder(req, res);
             if (!orderedItem) {
                 res.status(400).send("Failed to find ordered item");
+                return;
+            }
+            const isOpen = await this.isTodaysOrderOpen();
+            if (isOpen !== true) {
+                res.status(500).send("Order is not open ");
                 return;
             }
 
@@ -299,6 +297,11 @@ export class RestRouterImpl extends SkybitchesRouter {
             const voucher: number = Number.parseFloat(req.body?.voucher || "0");
             if (Number.isNaN(voucher)) {
                 res.status(500).send("Failed to parse voucher, not valid!");
+                return;
+            }
+            const isOpen = await this.isTodaysOrderOpen();
+            if (isOpen !== true) {
+                res.status(500).send("Order is not open!");
                 return;
             }
 
@@ -336,12 +339,17 @@ export class RestRouterImpl extends SkybitchesRouter {
         });
     }
 
-    public removeOrder(): void {
+    public registerRemoveOrder(): void {
         this.app.post("/order/delete", async (req, res) => {
             const orderItem = req.body?.orderItem;
             if (!orderItem) {
                 res.status(500).send("Failed to delete, no order item");
                 return null;
+            }
+            const isOpen = await this.isTodaysOrderOpen();
+            if (isOpen !== true) {
+                res.status(500).send("Order is not open ");
+                return;
             }
             const dailyOrder: WithId<DailyOrder> | Error | null = await this.lookupTodayOrder();
             if (!dailyOrder) {
@@ -359,10 +367,27 @@ export class RestRouterImpl extends SkybitchesRouter {
             }
             const firstOrderOfItemIdx = orderOfUser.orderedItems.findIndex(e => e.id === orderItem.id)
             orderOfUser.orderedItems = orderOfUser.orderedItems.filter((_, i) => i !== firstOrderOfItemIdx);
-            this.persistAndUpdateDailyOrder(res, dailyOrder);
+            await this.persistAndUpdateDailyOrder(res, dailyOrder);
         })
     }
 
+    public registerCloseOrders(): void {
+        this.app.post("/order/close", async (req, res) => {
+            const sessionData: SessionData = req.body._skybitches_data;
+            const closure = await this.closeTodaysOrder(sessionData.name)
+            if (closure instanceof Error) {
+                res.status(500).send(closure.message);
+                return;
+            }
+            if (!closure) {
+                res.status(500).send("Failed to close voting, already closed.")
+                return;
+            }
+            await this.notifyUsersWithNewOrder(res);
+        })
+    }
+
+    //#end region
     private async checkRequestForOrder(req: Request, res: Response): Promise<OrderItem | null> {
         if (!req.body?.menuItem) {
             console.log("No menu item");
@@ -379,6 +404,7 @@ export class RestRouterImpl extends SkybitchesRouter {
         return orderedItem;
     }
 
+
     private async persistAndUpdateDailyOrder(res: Response, dailyOrder: DailyOrder) {
         if (!(await this.orderCollection.updateOne({date: dailyOrder.date}, {
             $set: {
@@ -388,18 +414,20 @@ export class RestRouterImpl extends SkybitchesRouter {
             res.status(500).send("Failed to insert on db");
             throw new OrderAddException("Failure to add to order, db insert failed!");
         }
+        await this.notifyUsersWithNewOrder(res);
+    }
+
+    private async notifyUsersWithNewOrder(res: Response) {
         const newOrders = await this.lookupTodayOrder();
         if (!newOrders) {
             res.status(500).send("Failed to load new values of orders of db");
             throw new OrderAddException("Failure to read new values of orders from db!");
         }
         if (newOrders instanceof Error) {
-            res.status(500).send("Failed to lookup orders - " + JSON.stringify(dailyOrder));
+            res.status(500).send("Failed to lookup orders");
             return;
         }
         this.clientServerNotification.notifyOrders(newOrders);
         res.sendStatus(200);
     }
-
-
 }

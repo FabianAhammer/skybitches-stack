@@ -36,6 +36,7 @@
       </v-row>
     </v-container>
   </v-container>
+
 </template>
 <script lang="ts">
 import VoteContainer from "@/components/VoteContainer.vue";
@@ -62,10 +63,10 @@ export default {
   methods: {
     getIsCurrentTop(locationName: string): boolean {
       const locationVotes = this.dailyVote.votedLocations.find(
-          (e) => e.locationName === locationName
+        (e) => e.locationName === locationName
       )?.votedBy.length;
       const maxVotes = Math.max(
-          ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
+        ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
       );
 
       if (this.dailyVote.votedLocations.map(e => e.votedBy.length).filter(votes => votes === maxVotes).length > 1) {
@@ -75,10 +76,10 @@ export default {
     },
     getIsTiedCurrentTop(locationName: string): boolean {
       const locationVotes = this.dailyVote.votedLocations.find(
-          (e) => e.locationName === locationName
+        (e) => e.locationName === locationName
       )?.votedBy.length;
       const maxVotes = Math.max(
-          ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
+        ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
       );
       return locationVotes === maxVotes && locationVotes > 0 && this.dailyVote.votedLocations.map(e => e.votedBy.length).filter(votes => votes === maxVotes).length > 1;
 
@@ -86,7 +87,7 @@ export default {
 
     getIsDailyFavourite(locationName: string): boolean {
       return (this.dailyVote.votedLocations.find(
-          (e) => e.locationName === locationName
+        (e) => e.locationName === locationName
       )?.dailyFavourite ?? []).includes(new Date().getDay());
     },
 
@@ -103,10 +104,10 @@ export default {
 .loading-votings {
   height: 10rem;
   background: radial-gradient(circle,
-      rgba(190, 113, 25, 0.213) 0%,
-      rgb(58, 58, 58) 30%,
-      rgb(58, 58, 58) 70%,
-      rgba(38, 114, 147, 0.226) 100%);
+    rgba(190, 113, 25, 0.213) 0%,
+    rgb(58, 58, 58) 30%,
+    rgb(58, 58, 58) 70%,
+    rgba(38, 114, 147, 0.226) 100%);
   background-size: 200% 100%;
   filter: blur(3rem);
   animation: loading 7s linear infinite backwards;

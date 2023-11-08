@@ -9,7 +9,7 @@ import CurrentVoting from "@/views/CurrentVoting.vue";
 import OrderScreen from "@/views/OrderScreen.vue";
 import {currentVoteStore, locationStore, orderStore, queueStore, useApiStore, userStore} from "@/store/app";
 import {storeToRefs} from "pinia";
-import {DailyOrder, DailyVoting, Order, VotingUser} from "@/models/base_types";
+import {DailyOrder, DailyVoting} from "@/models/base_types";
 
 export default {
   methods: {currentVoteStore},
@@ -23,7 +23,8 @@ export default {
   async mounted() {
     this.dailyVote = await useApiStore().backend.getDailyVote();
     locationStore().setLocations(await useApiStore().backend.getLocations());
-    orderStore().setOrders(await useApiStore().backend.getOrders());
+    const dailyOrder = await useApiStore().backend.getOrders();
+    orderStore().setOrders(dailyOrder);
     currentVoteStore().setVoting(this.dailyVote);
     queueStore().socket.registerWebSocketMessageListener((message: MessageEvent<string>) => {
       const parseObject: {

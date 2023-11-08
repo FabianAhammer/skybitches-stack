@@ -19,7 +19,11 @@
           </v-btn>
           <h2 class="text-grey-lighten-1">{{ wonGeneralVoting?.locationName }}</h2>
           <div>
-            {{ (dailyOrder.orders.reduce((p1, p2) => p1 + p2.orderedItems.reduce((e1, e2) => e1 + e2.price, 0), 0) ?? 0).toFixed(2)}} €</div>
+            {{
+              (dailyOrder?.orders?.reduce((p1, p2) => p1 + p2?.orderedItems?.reduce((e1, e2) => e1 + e2.price, 0), 0) ?? 0)?.toFixed(2)
+            }}
+            €
+          </div>
         </v-card-title>
 
         <v-dialog width="auto" v-model="menuDialogue">
@@ -37,26 +41,32 @@
               </v-card-text>
 
               <v-card-text class="w-10 text-grey-lighten-1 text-center">
-                <v-btn size="32" icon="mdi mdi-plus" class="bg-orange-darken-1"
+                <v-btn :disabled="!currentOrderingsDisplayed?.isOpen" size="32" icon="mdi mdi-plus"
+                       class="bg-orange-darken-1"
                        @click="add(item)"></v-btn>
               </v-card-text>
             </div>
 
           </v-card>
           <v-btn
-              text="Close"
-              class="bg-orange-darken-2"
-              @click="menuDialogue = false"
+            text="Close"
+            class="bg-orange-darken-2"
+            @click="menuDialogue = false"
           >
           </v-btn>
         </v-dialog>
       </v-card>
     </v-row>
-
+    <v-row class="pa-2 d-flex justify-center">
+      <v-btn @click="closeOrders()" :disabled="!currentOrderingsDisplayed?.isOpen">
+        <v-icon>mdi mdi-lock</v-icon>
+        close orders
+      </v-btn>
+    </v-row>
     <v-container class="grid">
       <v-card
-          v-for="order in dailyOrder?.orders?.sort((e1,_) => e1.user === user ? -1 : 1 ).filter(e => e.orderedItems.length > 0)"
-          :key="order.id" class="ma-2 w-100">
+        v-for="order in dailyOrder?.orders?.sort((e1,_) => e1.user === user ? -1 : 1 ).filter(e => e.orderedItems.length > 0)"
+        :key="order.id" class="ma-2 w-100">
         <v-card-title>
           <div class="d-flex w-100">
             <v-avatar :color="order.user === user ? 'blue' : 'grey'" size="large">
@@ -74,28 +84,31 @@
               {{ orderItem.price.toFixed(2) }}€
             </v-card-text>
             <v-card-text class="d-flex align-center justify-center w-25">
-              <v-btn variant="plain" density="compact" v-if="order.user === user" @click="remove(orderItem)">
+              <v-btn variant="plain" density="compact" v-if="order.user === user && currentOrderingsDisplayed?.isOpen"
+                     @click="remove(orderItem)">
                 <v-icon class="text-red-accent-2">mdi-delete</v-icon>
               </v-btn>
-              <v-btn variant="plain" density="compact" v-if="order.user !== user" @click="add(orderItem)">
+              <v-btn variant="plain" density="compact" v-if="order.user !== user && currentOrderingsDisplayed?.isOpen"
+                     @click="add(orderItem)">
                 <v-icon class="text-blue-grey-lighten-2">mdi-content-copy</v-icon>
               </v-btn>
             </v-card-text>
           </div>
         </div>
         <v-card-subtitle style="border-top:1px dashed grey;" class="d-flex pa-3">
-          <v-form :disabled="order.user !== user || disable" v-model="validVoucherApply" class="w-100 d-flex">
+          <v-form :disabled="order.user !== user || !currentOrderingsDisplayed.isOpen" v-model="validVoucherApply"
+                  class="w-100 d-flex">
             <v-text-field
-                v-if="order.user === user"
-                class="w-100"
-                v-model=" voucher "
-                :placeholder="(order.voucher??0)+'€'"
-                type="text"
-                label="Gutschein"
-                :rules="voucherRules"
-                append-inner-icon="mdi mdi-currency-eur"
+              v-if="order.user === user && currentOrderingsDisplayed?.isOpen"
+              class="w-100"
+              v-model=" voucher "
+              :placeholder="(order.voucher??0)+'€'"
+              type="text"
+              label="Gutschein"
+              :rules="voucherRules"
+              append-inner-icon="mdi mdi-currency-eur"
             ></v-text-field>
-            <div v-if="order.user !== user" class="flex-fill d-flex">
+            <div v-if="order.user !== user || !currentOrderingsDisplayed?.isOpen" class="flex-fill d-flex">
               <v-card-text class="w-75 text-h7">
                 Gutschein
               </v-card-text>
@@ -106,7 +119,8 @@
               <v-card-text class="d-flex align-center justify-center w-25">
               </v-card-text>
             </div>
-            <v-btn v-if="order.user === user" icon="mdi mdi-check" variant="text" class="text-green-accent-1"
+            <v-btn v-if="order.user === user && currentOrderingsDisplayed?.isOpen" icon="mdi mdi-check" variant="text"
+                   class="text-green-accent-1"
                    @click="applyVoucher()"
                    :disabled="!validVoucherApply">
             </v-btn>
@@ -126,13 +140,14 @@
       </v-card>
     </v-container>
   </v-container>
+
 </template>
 
 <script lang="ts">
 import {currentVoteStore, locationStore, orderStore, useApiStore, userStore} from "@/store/app";
 import TimeLineContainer from "@/components/TimeLineContainer.vue";
 import {mapState} from "pinia";
-import {GeneralVoting, MenuItem, OrderItem, RestaurantLocation} from "@/models/base_types";
+import {DailyOrder, GeneralVoting, MenuItem, OrderItem, RestaurantLocation} from "@/models/base_types";
 
 export default {
   components: {TimeLineContainer},
@@ -145,6 +160,7 @@ export default {
       wonGeneralVoting: {} as GeneralVoting | null,
       expansionMap: new Map(),
       menuDialogue: false,
+      currentOrderingsDisplayed: null as unknown as DailyOrder,
       voucherRules: [
         (value: string) => {
           if (value === "") {
@@ -169,13 +185,26 @@ export default {
       this.loadData();
     })
     this.loadData();
+
+
+    this.loadDailyOrder();
+    orderStore().$subscribe(() => {
+      this.loadDailyOrder();
+    });
   },
   methods: {
     loadData() {
       if (this.dailyVoting && this.locations.length) {
         this.currentLocation = this.locations?.find(e => e?.id === this.dailyVoting?.winningLocation) || null;
         this.wonGeneralVoting = this.dailyVoting.votedLocations.find(e => e?.locationid === this.dailyVoting?.winningLocation) || null;
+        this.currentOrderingsDisplayed = this.dailyOrder;
       }
+    },
+    loadDailyOrder() {
+      this.currentOrderingsDisplayed = this.dailyOrder;
+    },
+    closeOrders() {
+      useApiStore().backend.closeOrders();
     },
     remove(orderItem: OrderItem) {
       useApiStore().backend.removeOrder(orderItem);

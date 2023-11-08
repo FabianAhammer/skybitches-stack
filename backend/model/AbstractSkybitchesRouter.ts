@@ -49,15 +49,15 @@ export abstract class SkybitchesRouter {
         this.registerDeleteTodaysVoting()
         this.registerGetLocations();
 
-        this.registerGetMenuForId();
 
         this.registerAddLocation();
 
         this.registerGetOrders();
         this.registerAddOrder();
         this.registerAddVoucher();
-        this.removeOrder();
-        this.copyOrder();
+        this.registerRemoveOrder();
+
+        this.registerCloseOrders();
     }
 
     private ensureLoggedInMiddleware() {
@@ -110,19 +110,15 @@ export abstract class SkybitchesRouter {
     public abstract registerAddLocation(): void;
 
     //Menu
-    public abstract registerSetMenuEntryForUser(): void;
-
-    public abstract registerGetMenuForId(): void;
-
     public abstract registerGetOrders(): void;
 
     public abstract registerAddOrder(): void;
 
     public abstract registerAddVoucher(): void;
 
-    public abstract removeOrder(): void;
+    public abstract registerRemoveOrder(): void;
 
-    public abstract copyOrder(): void;
+    public abstract registerCloseOrders(): void;
 
     /**
      * Create hash for usage in login
@@ -249,7 +245,6 @@ export abstract class SkybitchesRouter {
         const today = await this.getTodaysVotings();
 
         if (!today) {
-            console.log("No today voting");
             return false;
         }
         const todaysWinningLocation = today.votedLocations.find(e => e.locationid === today?.winningLocation);
@@ -261,14 +256,16 @@ export abstract class SkybitchesRouter {
         return false;
     }
 
-    protected async lookupTodayOrder(): Promise<WithId<DailyOrder> | Error | null> {
+    protected async lookupTodayOrder(autoCreate: boolean = true): Promise<WithId<DailyOrder> | Error | null> {
         const today = this.getTimeTrimmedDate(new Date());
         const todaysOrder = await this.orderCollection.findOne({date: today});
         if (todaysOrder) {
             return todaysOrder;
         }
-        return this.createTodayOrder(today);
-
+        if (autoCreate) {
+            return this.createTodayOrder(today);
+        }
+        return null;
     }
 
     private async createTodayOrder(date: string): Promise<WithId<DailyOrder> | Error | null> {
@@ -306,6 +303,37 @@ export abstract class SkybitchesRouter {
         }
         return new OrderCreationException("Failure to insert created daily order!")
 
+    }
+
+    protected async isTodaysOrderOpen(): Promise<boolean | Error> {
+        const todaysOrder = await this.lookupTodayOrder(false);
+        if (todaysOrder === null || todaysOrder instanceof Error) {
+            return new Error("Failed to find todays order!");
+        }
+        return todaysOrder.isOpen;
+    }
+
+    protected async closeTodaysOrder(user: String): Promise<boolean | Error> {
+        const isOpen = await this.isTodaysOrderOpen();
+        if (isOpen instanceof Error) {
+            return isOpen;
+        }
+        if (!isOpen) {
+            return false;
+        }
+
+        const todaysOrder = await this.lookupTodayOrder(false);
+        if (todaysOrder === null || todaysOrder instanceof Error) {
+            return new Error("Failed to close voting, order not properly returned!");
+        }
+
+        todaysOrder.closedBy = user;
+        todaysOrder.isOpen = false;
+        const result = await this.orderCollection.updateOne({_id: todaysOrder._id},
+            {
+                $set: todaysOrder
+            });
+        return result.acknowledged;
     }
 
 }
