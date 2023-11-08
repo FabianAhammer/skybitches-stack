@@ -1,27 +1,37 @@
 <template>
-  <v-container class="d-flex align-center justify-center h-screen w-100">
+  <v-container class="d-flex flex-column align-center justify-space-between h-screen w-100" style="gap:0.5rem">
+    <div clasS="align-self-center">
+
+    </div>
     <v-card class="w-25">
-      <v-card-title>Skybitches Login</v-card-title>
+      <v-img
+          width="500"
+          :aspect-ratio="4.3/1"
+          :cover="true"
+          src="@/assets/logo.png"
+      ></v-img>
       <v-form @submit.prevent="submit">
         <v-card-text>
           <v-text-field v-model="user" label="User" type="user" :loading="loading" :rules="userRules"
-            required></v-text-field>
+                        required></v-text-field>
           <v-text-field v-model="password" label="Password" type="password" :loading="loading" :rules="passwordRules"
-            required></v-text-field>
+                        required></v-text-field>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn block color="primary" type="submit" :loading="loading">
-            Login
+            <span>I am 18+ continue</span>
+            <v-icon>mdi mdi-arrow-right</v-icon>
           </v-btn>
         </v-card-actions>
       </v-form>
     </v-card>
+    <div></div>
   </v-container>
 </template>
 
 <script lang="ts">
-import { useApiStore } from "@/store/app";
+import {useApiStore} from "@/store/app";
 
 export default {
   data: () => ({
