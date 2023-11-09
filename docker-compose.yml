@@ -4,12 +4,12 @@ services:
   frontend:
     image: skybitches-frontend:latest
     ports:
-      - "8000:80"
+      - "8000:8000"
 
   backend:
     image: skybitches-backend:latest
     ports:
-      - "3000:3000"
+      - "3001:3000"
     restart: always
 
   mongo:
