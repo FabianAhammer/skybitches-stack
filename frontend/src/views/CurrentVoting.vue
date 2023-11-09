@@ -54,7 +54,7 @@ export default {
   data() {
     return {
       user: userStore().user,
-      dailyVote: {} as DailyVoting,
+      dailyVote: {} as DailyVoting | any,
     };
   },
   async mounted() {
@@ -69,25 +69,27 @@ export default {
         ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
       );
 
-      if (this.dailyVote.votedLocations.map(e => e.votedBy.length).filter(votes => votes === maxVotes).length > 1) {
+      if (this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length).filter((votes: number) => votes === maxVotes).length > 1) {
         return false;
       }
       return locationVotes === maxVotes && locationVotes > 0;
     },
     getIsTiedCurrentTop(locationName: string): boolean {
       const locationVotes = this.dailyVote.votedLocations.find(
-        (e) => e.locationName === locationName
+        (e: GeneralVoting) => e.locationName === locationName
       )?.votedBy.length;
       const maxVotes = Math.max(
         ...this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length)
       );
-      return locationVotes === maxVotes && locationVotes > 0 && this.dailyVote.votedLocations.map(e => e.votedBy.length).filter(votes => votes === maxVotes).length > 1;
+      return locationVotes === maxVotes && locationVotes > 0 && this.dailyVote.votedLocations.map((e: GeneralVoting) => e.votedBy.length
+      ).filter((votes: number) => votes === maxVotes
+      ).length > 1;
 
     },
 
     getIsDailyFavourite(locationName: string): boolean {
       return (this.dailyVote.votedLocations.find(
-        (e) => e.locationName === locationName
+        (e: GeneralVoting) => e.locationName === locationName
       )?.dailyFavourite ?? []).includes(new Date().getDay());
     },
 
