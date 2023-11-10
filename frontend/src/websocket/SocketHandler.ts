@@ -2,7 +2,7 @@ export class SocketHandler {
   private voteSocket: WebSocket;
 
   constructor(_socketURI: string) {
-    this.voteSocket = new WebSocket(_socketURI + "/socket");
+    this.voteSocket = new WebSocket(_socketURI);
   }
 
   public registerWebSocketMessageListener(consumer: (voting: MessageEvent) => void): void {

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "npx tsc && npm run copy-files && npm run start-db && concurrently \"npx tsc --watch\" \"nodemon --ignore 'spoaherd*.*' -q dist/backend/index.js\" ",
-    "prod": "npx tsc",
+    "prod": "npx tsc && npm run copy-files",
     "start-db": "docker-compose --env-file .dev-env up -d",
     "build": "echo 'No build found!'",
     "copy-files": "cp ./utility/spoaherd.sh ./dist/backend/utility/"

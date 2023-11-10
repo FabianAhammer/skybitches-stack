@@ -1,5 +1,5 @@
 <template>
-  <v-timeline direction="horizontal" side="start" size="small" v-if="dailyVoting">
+  <v-timeline class="resize-on-small" direction="horizontal" side="start" size="small" v-if="dailyVoting">
     <template v-for="(day, index) in days" :key="day">
       <v-timeline-item v-if="index < iterationOffset" :fillDot="true" dotColor="grey-darken-3"
                        icon="mdi-check"
@@ -14,7 +14,8 @@
         </template>
 
       </v-timeline-item>
-      <v-timeline-item v-if="index === iterationOffset" :fillDot="false" dotColor="orange" class="pulse">
+      <v-timeline-item v-if="index === iterationOffset" :fillDot="false" dotColor="orange" class="pulse"
+                       id="main_element">
         <p class="text-orange-lighten-1">
           {{ day.name }}
         </p>
@@ -67,7 +68,7 @@ export default {
     this.changeOfVote(currentVoteStore().dailyVoting);
     currentVoteStore().$subscribe((_, state) => {
       this.changeOfVote(state?.dailyVoting);
-    })
+    });
   },
   methods: {
     changeOfVote(state: DailyVoting | null): void {
@@ -93,11 +94,7 @@ export default {
       }
       return days;
     },
-    iterationFunctionForDays(iterator
-                                 :
-                                 number
-    ):
-        DayOfMonth {
+    iterationFunctionForDays(iterator: number): DayOfMonth {
       if (iterator < 0) {
         return this.getDayStruct(iterator + 7);
       } else if (iterator > 6) {
@@ -107,11 +104,7 @@ export default {
       }
     }
     ,
-    getDayStruct(dayOfWeek
-                     :
-                     number
-    ):
-        DayOfMonth {
+    getDayStruct(dayOfWeek: number): DayOfMonth {
       return this.dateStruct.find(e => e.dayOfWeek === dayOfWeek) || this.dateStruct[0];
     }
     ,
@@ -127,6 +120,10 @@ export interface DateAndDayOfMonth extends DayOfMonth {
   date: string;
 }
 </script>
-<style scoped lang="scss">
-
+<style scoped>
+@media only screen and (max-width: 600px) {
+  .resize-on-small {
+    transform: scale(0.72) translateX(-75%);
+  }
+}
 </style>

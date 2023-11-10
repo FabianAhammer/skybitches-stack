@@ -3,7 +3,7 @@
     <div clasS="align-self-center">
 
     </div>
-    <v-card class="w-25">
+    <v-card class="card-size">
       <v-img
           width="500"
           :aspect-ratio="4.3/1"
@@ -62,3 +62,15 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+  .card-size{
+    width: 25%;
+  }
+
+   @media only screen and (max-width: 600px)  {
+     .card-size{
+       width: 75%;
+     }
+   }
+</style>

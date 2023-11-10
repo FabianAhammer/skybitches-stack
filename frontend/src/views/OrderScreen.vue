@@ -11,7 +11,7 @@
     </v-row>
     <v-row>
       <v-card class="flex-fill text-center">
-        <v-card-title class="d-flex align-center justify-space-between" style="gap:3rem">
+        <v-card-title class="d-block d-sm-flex align-center justify-space-between">
           <v-btn variant="flat" class="bg-orange-darken-1" :disabled="!wonGeneralVoting?.menu"
                  @click="menuDialogue = true">
             <v-icon icon="mdi mdi-menu"></v-icon>
@@ -33,10 +33,10 @@
             </v-card-title>
             <div class="d-flex flex-fill pa-2 align-center" :class="index % 2 == 1 ? 'bg-grey-darken-4' : ''"
                  v-for="(item,index) in wonGeneralVoting?.menu?.menuItems" :key="index">
-              <v-card-text class="w-75 text-h7">
+              <v-card-text class="w-75 text-h7" style="word-break: break-all">
                 {{ item.name }}
               </v-card-text>
-              <v-card-text class="w-25 text-grey-lighten-1 align-center text-end">
+              <v-card-text class="w-25 text-grey-lighten-1 align-center text-end" >
                 {{ item.price.toFixed(2) }}€
               </v-card-text>
 
@@ -225,5 +225,11 @@ export default {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
+}
+
+@media only screen and (max-width: 600px)  {
+  .grid{
+    display: block;
+  }
 }
 </style>
