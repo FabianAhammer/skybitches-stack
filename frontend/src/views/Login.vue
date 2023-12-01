@@ -150,12 +150,16 @@ export default {
     position: absolute;
     height: 100%;
     width: 100%;
-    background-image: url("@/assets/bg_login.png");
     background-size: 100vw;
-    @for $i from 1 through 100 {
+    @for $i from 1 through 4 {
       &__#{$i} {
-        $uri: "@/assets/bg/" +($i)+ ".png";
-        background-image: url("@/assets/bg/#{$i}.png") !important;
+        background-image: url("@/assets/bg/#{$i}.png");
+      }
+
+      @media only screen and (max-width: 600px) {
+        &__#{$i} {
+          background-image: url("@/assets/mobile-bg/#{$i}.png");
+        }
       }
     }
   }
@@ -168,7 +172,6 @@ export default {
     height: 240px;
     border-radius: 50%;
     pointer-events: none;
-    background-image: url("@/assets/bg_login.png");
     background-size: 100vw;
     transition: opacity 1.3s ease;
     opacity: 0;
@@ -183,7 +186,6 @@ export default {
     filter: blur(10px);
     border-radius: 50%;
     pointer-events: none;
-    background-image: url("@/assets/bg_login.png");
     background-size: 100vw;
     transition: opacity 1.2s ease;
     opacity: 0;
@@ -198,7 +200,6 @@ export default {
     filter: blur(7px);
     border-radius: 50%;
     pointer-events: none;
-    background-image: url("@/assets/bg_login.png");
     background-size: 100vw;
     transition: opacity 1.1s ease;
     opacity: 0;
@@ -213,7 +214,6 @@ export default {
     filter: blur(2px);
     border-radius: 50%;
     pointer-events: none;
-    background-image: url("@/assets/bg_login.png");
     background-size: 100vw;
     transition: opacity 1s ease;
     opacity: 0;
@@ -251,30 +251,5 @@ export default {
   .card-size {
     width: 75%;
   }
-
-  .login-page {
-    &__image {
-      background-size: 500% !important;
-      background-position: 50% !important;
-    }
-
-    &__no-filter {
-      background-size: 500% !important;
-    }
-
-    &__one_third-filter {
-      background-size: 500% !important;
-    }
-
-    &__two_third-filter {
-      background-size: 500% !important;
-    }
-
-    &__three_third-filter {
-      background-size: 500% !important;
-    }
-  }
-
-
 }
 </style>
