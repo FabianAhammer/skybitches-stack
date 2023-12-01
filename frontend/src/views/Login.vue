@@ -2,13 +2,12 @@
   <v-container class="d-flex flex-column align-center justify-space-between h-screen w-100"
                style="gap:0.5rem">
     <div class="position-absolute h-screen w-100" style="top:0" v-on:mousemove="moveDiscovery($event)">
-      <div class="position-absolute h-screen w-100 login-page">
-        <div class="login-page__image"></div>
-
-        <div ref="nofilter" class="login-page__no-filter"></div>
-        <div ref="onethirdfilter" class="login-page__one_third-filter"></div>
-        <div ref="twothirdfilter" class="login-page__two_third-filter"></div>
-        <div ref="threethirdfilter" class="login-page__three_third-filter"></div>
+      <div class="position-absolute h-screen w-100 login-page ">
+        <div class="login-page__image background_image_carousel_before"></div>
+        <div ref="nofilter" class="login-page__no-filter background_image_carousel"></div>
+        <div ref="onethirdfilter" class="login-page__one_third-filter background_image_carousel"></div>
+        <div ref="twothirdfilter" class="login-page__two_third-filter background_image_carousel"></div>
+        <div ref="threethirdfilter" class="login-page__three_third-filter background_image_carousel"></div>
       </div>
     </div>
     <div clasS="align-self-center">
@@ -48,6 +47,18 @@
 import {useApiStore} from "@/store/app";
 import {ref} from "vue";
 
+const illustrations = import.meta.glob(
+  '@/assets/bg/*.png'
+)
+const keys = Object.keys(illustrations);
+const pngNames: string[] = [];
+keys.forEach(key => {
+  const name = illustrations[key].name;
+  if (name) {
+    pngNames.push(name);
+  }
+});
+
 export default {
   setup() {
     const nofilter = ref<Element>("nofilter");
@@ -55,15 +66,26 @@ export default {
     const twothirdfilter = ref<Element>('twothirdfilter');
     const threethirdfilter = ref<Element>('threethirdfilter');
 
-
-    // ...
     return {
       nofilter,
       onethirdfilter,
       twothirdfilter,
       threethirdfilter,
-
     }
+  },
+  mounted() {
+    let lastNumber = +localStorage.getItem("lastScreen");
+    let nextNumber = 0;
+    console.log(lastNumber);
+    if (lastNumber !== null) {
+      nextNumber = lastNumber + 1
+      if (nextNumber > pngNames.length) {
+        nextNumber = 1;
+      }
+    }
+    localStorage.setItem("lastScreen", `${nextNumber}`);
+    this.setImage(nextNumber);
+
   },
   data: () => ({
     user: "",
@@ -102,6 +124,16 @@ export default {
       const y = event.clientY - rect.top - element.offsetWidth / 2;
       element.style.transform = `translate(${x}px,${y}px)`;
       element.style.backgroundPosition = `${-x}px ${-y}px`;
+    },
+    setImage(imageIndex: number) {
+      const elementsByClassName = [...document.getElementsByClassName("background_image_carousel")];
+      const beforeElements = [...document.getElementsByClassName("background_image_carousel_before")];
+      elementsByClassName.forEach(element => {
+        element.classList.add(`login-page__image__${imageIndex}`);
+      });
+      beforeElements.forEach(element => {
+        element.classList.add(`login-page__image__${imageIndex}`);
+      })
     }
   },
 };
@@ -111,7 +143,7 @@ export default {
 .login-page {
   overflow: hidden;
 
-  &__image::before {
+  &__image {
     z-index: -1;
     content: '';
     filter: blur(15px);
@@ -120,6 +152,12 @@ export default {
     width: 100%;
     background-image: url("@/assets/bg_login.png");
     background-size: 100vw;
+    @for $i from 1 through 100 {
+      &__#{$i} {
+        $uri: "@/assets/bg/" +($i)+ ".png";
+        background-image: url("@/assets/bg/#{$i}.png") !important;
+      }
+    }
   }
 
   &__no-filter {
@@ -215,24 +253,25 @@ export default {
   }
 
   .login-page {
-    &__image::before {
-      background-image: url("@/assets/bg_login_mobile.png");
+    &__image {
+      background-size: 500% !important;
+      background-position: 50% !important;
     }
 
     &__no-filter {
-      background-image: url("@/assets/bg_login_mobile.png");
+      background-size: 500% !important;
     }
 
     &__one_third-filter {
-      background-image: url("@/assets/bg_login_mobile.png");
+      background-size: 500% !important;
     }
 
     &__two_third-filter {
-      background-image: url("@/assets/bg_login_mobile.png");
+      background-size: 500% !important;
     }
 
     &__three_third-filter {
-      background-image: url("@/assets/bg_login_mobile.png");
+      background-size: 500% !important;
     }
   }
 
