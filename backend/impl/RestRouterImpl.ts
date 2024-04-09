@@ -165,7 +165,6 @@ export class RestRouterImpl extends SkybitchesRouter {
         voteStatus: DailyVoting,
         today: string
     ): Promise<boolean> {
-        false;
         if (
             voting.filter((e) => e.votedBy.length === voteStatus.requiredVotes)
                 .length === 1
